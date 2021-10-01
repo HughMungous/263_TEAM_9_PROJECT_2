@@ -14,7 +14,7 @@ class RouteFinder:
     adjacencyMatrix: List[List[int]] # durations between nodes: [i][j] = duration i to j
     maxDemand: int = 26
 
-    def generate(self, numbers, k):
+    def generate(self, numbers: List[int], k: int):
         """
         Generates combinations of numbers C k, preserves order.
         """
@@ -29,7 +29,7 @@ class RouteFinder:
 
         return ans
 
-    def generateSubgraphs(self, maxNodes):
+    def findValidSubgraphs(self, maxNodes: int = 1):
         """
         Function to generate subgraphs for application of a TSP algorithm.
 
@@ -38,15 +38,26 @@ class RouteFinder:
         exists.
         """
         ans = [subGraph for subGraph in self.generate(list(self.nodes.keys()), maxNodes) if sum(nodes[node] for node in subGraph) <= 26]
-        if ans: # checking whether any subGraphs passed the test
-            return ans + self.generateSubgraphs(maxNodes+1)
-        return []
+        if not ans: # checking whether any subGraphs passed the test
+            return []
+        return ans + self.findValidSubgraphs(maxNodes+1)
 
        
 
-    def eulerianPathFinder(self, subGraph):
+    def antColonyTSP(self, subGraph: List[int]):
         """
-        Function to find the best circuit for some subgraph.
+        Function to find the best circuit for some subgraph using the cheapest insertion method.
+
+        ants:
+            memory - will not visit the same city twice
+            knowledge of distance to surrounding nodes
+            If distance is the same, choose using pheremone concentration
+            P_{ij}^{k} (probability for ant k to choose j from i) = ([t_{ij}]^{a} * [n_{ij}]^{b})/(sum([t_{is}]^{a} * [n_{is}]^{b} for s in ValidNodes))
+            where: 
+                t = pheremone intensity on route/arc
+                a = pheremone intensity regulation parameter
+                n = visibility of node j from i = 1/d where d is the distance between two nodes
+                b = visibility strength parameter
         """
         pass
 
@@ -60,6 +71,7 @@ if __name__ == "__main__":
     # print(nodes)
 
     routeFinder = RouteFinder(nodes=nodes, adjacencyMatrix=[])
-    subgraphs = routeFinder.generateSubgraphs(1)
-    print(subgraphs)
+    subgraphs = routeFinder.findValidSubgraphs(1)
+    # for g in subgraphs:
+    #     print(f"nodes:{g}\t\t total demand:{sum(nodes[n] for n in g)}")
     pass
