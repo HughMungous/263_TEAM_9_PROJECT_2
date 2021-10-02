@@ -1,6 +1,6 @@
 
 ## module imports
-from Code import routeFinding
+from Code import routing, dataInput
 
 # data handling
 import numpy as np
@@ -36,31 +36,17 @@ def main():
     pass
 
 if __name__ == "__main__":
-    demands = glob("./Data/AverageDemands.csv")[0]
+    locations = dataInput.readLocationGroups()
+    stores, demands = dataInput.readAverageDemands()
+    travelDurations = dataInput.readTravelDurations()
+
 
     runSouth = True
     if runSouth:
-        south = ['Countdown Manukau', 'Countdown Manukau Mall',	'Countdown Manurewa', 'Countdown Papakura',	'Countdown Roselands', 'Countdown Takanini', 'SuperValue Flatbush', 'SuperValue Papakura']
-        data = pd.read_csv(demands, delimiter=',',index_col=0)
-
-        nodes = {store: data['Monday'][store] for store in south}
-
-        # print(nodes)
-        temp = routeFinding.RouteFinder(nodes=nodes, adjacencyMatrix=[])
-        validRoutes = temp.findValidSubgraphs()
+        southDemands = {day: {location: demands[day][location] for location in locations['South']} for day in demands}
         
-        validRoutesByLength = {i:[] for i in range(1,len(max(validRoutes, key = len))+1)}
-        for route in validRoutes:
-            validRoutesByLength[len(route)].append(route)
-
-        # for i in validRoutesByLength:
-            # print(f"i:{i}, routes:{validRoutesByLength[i]}")
-        s = set()
-        for r in validRoutesByLength[4]:
-            s |= set(r)
-            print(r)
-        print(len(validRoutesByLength[4]))
-        print(s)
+        southernRoutesMonday = routing.RouteFinder(nodes=southDemands['Monday'], adjacencyMatrix=travelDurations)
+        print(southernRoutesMonday.findValidSubgraphs())
     # main()
     pass
 
