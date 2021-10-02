@@ -55,8 +55,12 @@ if __name__ == "__main__":
 
         # for i in validRoutesByLength:
             # print(f"i:{i}, routes:{validRoutesByLength[i]}")
-        # print(len(validRoutes))
-        pass
+        s = set()
+        for r in validRoutesByLength[4]:
+            s |= set(r)
+            print(r)
+        print(len(validRoutesByLength[4]))
+        print(s)
     # main()
     pass
 
