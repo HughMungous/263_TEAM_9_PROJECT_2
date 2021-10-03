@@ -3,15 +3,16 @@ File for route creation algorithms.
 
 currently no implementation.
 """
+import pandas as pd
+
 from dataclasses import dataclass
-from typing import Dict, List, Any
-from random import randint, seed, sample
+from typing import Dict, List, Any, Union
+from random import randint, seed, sample, shuffle
 
 @dataclass
 class Region:
     """Will change just keeping the work localised for now"""
-    nodes: Dict[str, int] # node: demand - might change this later 
-    adjacencyMatrix: List[List[int]] # durations between nodes: [i][j] = duration i to j
+    nodes: Dict[str, Union[int, float]] # node: demand - might change this later 
     maxDemand: int = 26
 
     def generate(self, numbers: List[Any], k: int)->List[Any]:
@@ -55,7 +56,7 @@ class Region:
         
         return res         
 
-    def createPartitions(self, subGraphs: Dict[int, List[Any]], maxNumber: int, randomSeed: int = 100):
+    def createPartitions(self, subGraphs: Dict[int, List[Any]], maxNumber: int, randomSeed: int = 100, randomly: bool = False):
         """Function to generate partitions of the region provided the valid subgraphs
         
         Parameters:
@@ -73,63 +74,58 @@ class Region:
             
             while storesSet - cSet: # while we have not found a partition
                 # Going from the largest subGraps to the smallest
-                for i in range(min(numStores-len(cSet), max(subGraphs.keys())), 0, -1):
-                    # randomly sorting the possible graphs
-                    temp = sample(subGraphs[i], len(subGraphs[i]))
-                    for j in range(len(temp)):
-                        if cSet.isdisjoint(set(temp[j])):
-                            cSet |= set(temp[j]) # updating the set
-                            current.append(temp[j]) # updating the  current partition
+                if not randomly:
+                    for i in range(min(numStores-len(cSet), max(subGraphs.keys())), 0, -1):
+                        # randomly sorting the possible graphs
+                        temp = sample(subGraphs[i], len(subGraphs[i]))
+                        for j in range(len(temp)):
+                            if cSet.isdisjoint(set(temp[j])):
+                                cSet |= set(temp[j]) # updating the set
+                                current.append(temp[j]) # updating the  current partition
+
+                else:
+                    randomisedKeys = list(range(1, min(numStores-len(cSet), max(subGraphs.keys()))+1))
+                    shuffle(randomisedKeys)
+                    for i in randomisedKeys:
+                    
+                        # randomly sorting the possible graphs
+                        temp = sample(subGraphs[i], len(subGraphs[i]))
+                        for j in range(len(temp)):
+                            if cSet.isdisjoint(set(temp[j])):
+                                cSet |= set(temp[j]) # updating the set
+                                current.append(temp[j]) # updating the  current partition
+
             ans.append(current)
 
             maxNumber-=1
         
         return ans
+
+@dataclass     
+class Pathfinder:
+    durations: pd.DataFrame
+    # demands: Dict[str, Union[int, float]]
+    def nearestNeighbour(self, graph: List[str], randomSeed: int = 100):
+        seed(randomSeed)
+        # selecting a random starting point
         
+        visited = sample(graph, 1)
 
-    def antColonyTSP(self, subGraph: List[int], iterationThreshold: int, numAnts: int, numNodes: int):
-        """
-        Function to find the best circuit for some subgraph using the cheapest insertion method.
+        unvisited = graph[:]
+        unvisited.remove(visited[0])
 
-        ants:
-            memory - will not visit the same city twice
-            knowledge of distance to surrounding nodes
-            If distance is the same, choose using pheremone concentration
-            P_{ij}^{k} (probability for ant k to choose j from i) = ([t_{ij}]^{a} * [n_{ij}]^{b})/(sum([t_{is}]^{a} * [n_{is}]^{b} for s in ValidNodes))
-            where: 
-                t = pheremone intensity on route/arc
-                a = pheremone intensity regulation parameter
-                n = visibility of node j from i = 1/d where d is the distance between two nodes
-                b = visibility strength parameter
+        while unvisited:
+            cMin = unvisited[0]
+            for node in unvisited:
+                if self.durations[visited[-1]][node] < self.durations[visited[-1]][cMin]:
+                    cMin = node
 
-        psuedocode:
-            --Taken from: https://doi.org/10.1109/4235.585892
-            
-            Iteration loop:
-                each ant is positioned at a starting node
-                step loop:
-                    each ant applies a state transition rule to incrementally build a solution. and a local pheremone 
-                    updating rule
-                until: all ants have a complete solution
-                Global pheremone rule applied
-            until: iteration limit
+            visited.append(cMin)
+            unvisited.remove(cMin)
+        return visited
 
-        rules:
-            transition:
-                Transition from r->s given by:
-                s = Max(t(r,u)*(n(r,u)**b) for u in unvisitedCities) if q <= q_0 else random
-                where:
-                    q = random var on [0,1]
-                    q_0 is a parameter
-            local:
 
-            global:
-                t(r,s) = (1-a)*t(r,s) + sum_{k=1}^{m}(deltaT_{k}(r,s))
-                where:
-                    deltaT_{k}(r,s)= 1/L_k if (r,s) in ant_k.tour else 0
-                    L_k = total tour length for ant k
-        """
-        pass
+
 
 
 

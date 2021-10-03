@@ -36,17 +36,7 @@ def main():
     pass
 
 if __name__ == "__main__":
-    locations = dataInput.readLocationGroups()
-    stores, demands = dataInput.readAverageDemands()
-    travelDurations = dataInput.readTravelDurations()
-
-
-    runSouth = True
-    if runSouth:
-        southDemands = {day: {location: demands[day][location] for location in locations['South']} for day in demands}
-        
-        southernRoutesMonday = routing.Region(nodes=southDemands['Monday'], adjacencyMatrix=travelDurations)
-        print(southernRoutesMonday.findValidSubgraphs())
+    
     # main()
     pass
 
