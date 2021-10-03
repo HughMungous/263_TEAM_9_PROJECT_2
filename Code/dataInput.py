@@ -7,9 +7,9 @@ import pandas as pd
 from typing import Dict, List, Tuple
 
 
-def readLocationGroups()->Dict[str, List[str]]:
+def readLocationGroups(fileAddress: str = "./Data/LocationGroups.csv")->Dict[str, List[str]]:
     """returns the stores in their location groups"""
-    fileAddress = "./Data/LocationGroups.csv"
+    
 
     locationGroupData = pd.read_csv(fileAddress, sep=',')
     
@@ -22,9 +22,9 @@ def readLocationGroups()->Dict[str, List[str]]:
         
     return res
 
-def readAverageDemands(roundUp: bool = False)->Tuple[List[str], Dict[str, Dict[str, int]]]:
+def readAverageDemands(fileAddress: str = "./Data/AverageDemands.csv", roundUp: bool = False)->Tuple[List[str], Dict[str, Dict[str, int]]]:
     """Returns the list of all stores and the demands for all stores from monday to saturday"""
-    fileAddress = "./Data/AverageDemands.csv"
+    
     averageDemands = pd.read_csv(fileAddress, sep=',',index_col=0)
 
     stores = averageDemands.index
@@ -34,16 +34,24 @@ def readAverageDemands(roundUp: bool = False)->Tuple[List[str], Dict[str, Dict[s
         res = {day: {store: averageDemands[day][store] for store in stores} for day in averageDemands.columns}
     return stores, res
     
-def readTravelDurations()->pd.DataFrame:
+def readTravelDurations(fileAddress: str = "./Data/WoolworthsTravelDurations.csv")->pd.DataFrame:
     """Returns the adjacency matrix for the stores with the values converted to hours"""
-    fileAddress = "./Data/WoolworthsTravelDurations.csv"
     
     return pd.read_csv(fileAddress,sep=',',index_col=0).applymap(lambda x: x/3600)
 
-if __name__=="__main__":
-    groups = readLocationGroups()
-    stores, demands = readAverageDemands(roundUp=True)
-    durationAdjacencyMatrix = readTravelDurations()
+def readStoreCoordinates(fileAddress: str = "./Data/WoolworthsLocations.csv")->pd.DataFrame:
+    """Read the longitude and latitude values from the WoolworthsLocations csv"""
+    
+    return pd.read_csv(fileAddress, sep=",",usecols=['Store','Lat','Long']).set_index('Store')
+    
+    
 
+if __name__=="__main__":
+    # groups = readLocationGroups()
+    # stores, demands = readAverageDemands(roundUp=True)
+    # durationAdjacencyMatrix = readTravelDurations()
+    locations = readStoreCoordinates()
+    print(locations.head())
+    print(locations.columns)
     # print(demands)
     pass
