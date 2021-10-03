@@ -13,6 +13,7 @@ from random import randint, seed, sample, shuffle
 class Region:
     """Will change just keeping the work localised for now"""
     nodes: Dict[str, Union[int, float]] # node: demand - might change this later 
+    locations: pd.DataFrame
     maxDemand: int = 26
 
     def generate(self, numbers: List[Any], k: int)->List[Any]:
@@ -54,7 +55,20 @@ class Region:
                 validAns = False
             i+=1
         
-        return res         
+        return res
+
+    def centroidDistanceSquared(self, stores: List[str])->float:
+        """Calculates the average distance from the centroid of the region bound by the provided location"""
+        
+        centroidLat, centroidLong = 0, 0
+        for store in stores:
+            centroidLat += self.locations['Lat'][store]
+            centroidLong += self.locations['Long'][store]
+        centroidLat /= len(stores)
+        centroidLong /= len(stores)
+
+        return sum([(self.locations['Lat'][store]-centroidLat)**2 + (self.locations['Long'][store]-centroidLong)**2])/len(stores)
+
 
     def createPartitions(self, subGraphs: Dict[int, List[Any]], maxNumber: int, randomSeed: int = 100, randomly: bool = False):
         """Function to generate partitions of the region provided the valid subgraphs
@@ -128,22 +142,21 @@ class Pathfinder:
         return visited
 
 
-
-
-
-
-from glob import glob
+import dataInput
 if __name__ == "__main__":
     seed(508) # keep the tests the same
     
+    depot = "Distribution Centre Auckland"
+    locations = dataInput.readLocationGroups()
+    stores, demands = dataInput.readAverageDemands()
+    travelDurations = dataInput.readTravelDurations()
+    coordinates = dataInput.readStoreCoordinates()
+
+    southDemands = {day: {location: demands[day][location] for location in locations['South']} for day in demands}
+    southernRoutesMonday = Region(nodes=southDemands['Monday'], locations=coordinates)
+    validSubgraphs = southernRoutesMonday.findValidSubgraphs()
+
+    for k in validSubgraphs:
+        print(f"route length:{k}, centroid distances: {[southernRoutesMonday.centroidDistanceSquared(r) for r in validSubgraphs[k]]}")
     
-
-    # nodes = {i: randint(4, 15) for i in range(10)}
-    # print(nodes)
-
-    # routeFinder = RouteFinder(nodes=nodes, adjacencyMatrix=[])
-    # subgraphs = routeFinder.findValidSubgraphs(1)
-    # print(subgraphs)
-    # for g in subgraphs:
-    #     print(f"nodes:{g}\t\t total demand:{sum(nodes[n] for n in g)}")
     pass
