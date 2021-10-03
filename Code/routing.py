@@ -4,6 +4,7 @@ File for route creation algorithms.
 currently no implementation.
 """
 import pandas as pd
+from numpy import mean 
 
 from dataclasses import dataclass
 from typing import Dict, List, Any, Union
@@ -31,7 +32,7 @@ class Region:
 
         return ans
 
-    def findValidSubgraphs(self)->Dict[int, List[Any]]:
+    def findValidSubgraphs(self, removeOutliers: float = 0.5)->Dict[int, List[Any]]:
         """
         Function to generate subgraphs for application of a TSP algorithm.
 
@@ -42,6 +43,7 @@ class Region:
         res = {}
         def subFunc(maxNodes: int):
             ans = [subGraph for subGraph in self.generate(list(self.nodes.keys()), maxNodes) if sum(self.nodes[node] for node in subGraph) <= 26]
+
             if not ans: # checking whether any subGraphs passed the test
                 return []
             return ans 
@@ -53,6 +55,13 @@ class Region:
             if not res[i]:
                 del res[i]
                 validAns = False
+            elif removeOutliers and i > 1:
+                centroidDistances = [self.centroidDistanceSquared(g) for g in res[i]]
+                m = mean(centroidDistances)
+                tempRes = []
+                for j in range(len(res[i])):
+                    if centroidDistances[j] <= removeOutliers*m: tempRes.append(res[i][j])
+                res[i] = sorted(tempRes, key = self.centroidDistanceSquared)
             i+=1
         
         return res
@@ -77,8 +86,8 @@ class Region:
             - havent decided on input typing yet
         """
         seed(randomSeed)
-        for k in subGraphs:
-            subGraphs[k].sort(key=self.centroidDistanceSquared)
+        # for k in subGraphs:
+        #     subGraphs[k].sort(key=self.centroidDistanceSquared)
 
         # creating sets
         storesSet, numStores = set(self.nodes.keys()), len(self.nodes.keys())
@@ -95,11 +104,18 @@ class Region:
                 if not randomly:
                     for i in range(min(numStores-len(cSet), max(subGraphs.keys())), 0, -1):
                         # randomly sorting the possible graphs
+                        counter = 0
                         temp = sample(subGraphs[i], len(subGraphs[i]))
                         for j in range(len(temp)):
                             if cSet.isdisjoint(set(temp[j])):
                                 cSet |= set(temp[j]) # updating the set
                                 current.append(temp[j]) # updating the  current partition
+                                if i > 2: 
+                                    counter = counter + 1
+                                if counter >= 2:
+                                    break
+                            
+                            
 
                 else:
                     # this isnt completely accurate yet - will continue to choose from the same row 
@@ -146,7 +162,7 @@ class Pathfinder:
 
 if __name__ == "__main__":
     import dataInput
-    
+
     seed(508) # keep the tests the same
     
     depot = "Distribution Centre Auckland"
