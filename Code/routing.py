@@ -63,6 +63,8 @@ class Region:
             - havent decided on input typing yet
         """
         seed(randomSeed)
+
+        # creating sets
         storesSet, numStores = set(self.nodes.keys()), len(self.nodes.keys())
 
         ans = []
@@ -84,6 +86,7 @@ class Region:
                                 current.append(temp[j]) # updating the  current partition
 
                 else:
+                    # this isnt completely accurate yet
                     randomisedKeys = list(range(1, min(numStores-len(cSet), max(subGraphs.keys()))+1))
                     shuffle(randomisedKeys)
                     for i in randomisedKeys:

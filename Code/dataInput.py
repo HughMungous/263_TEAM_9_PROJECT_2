@@ -22,14 +22,16 @@ def readLocationGroups()->Dict[str, List[str]]:
         
     return res
 
-def readAverageDemands()->Tuple[List[str], Dict[str, Dict[str, int]]]:
+def readAverageDemands(roundUp: bool = False)->Tuple[List[str], Dict[str, Dict[str, int]]]:
     """Returns the list of all stores and the demands for all stores from monday to saturday"""
     fileAddress = "./Data/AverageDemands.csv"
     averageDemands = pd.read_csv(fileAddress, sep=',',index_col=0)
 
     stores = averageDemands.index
-    res = {day: {store: averageDemands[day][store] for store in stores} for day in averageDemands.columns}
-
+    if roundUp:
+        res = {day: {store: np.ceil(averageDemands[day][store]) for store in stores} for day in averageDemands.columns}
+    else:
+        res = {day: {store: averageDemands[day][store] for store in stores} for day in averageDemands.columns}
     return stores, res
     
 def readTravelDurations()->pd.DataFrame:
@@ -40,8 +42,8 @@ def readTravelDurations()->pd.DataFrame:
 
 if __name__=="__main__":
     groups = readLocationGroups()
-    stores, demands = readAverageDemands()
+    stores, demands = readAverageDemands(roundUp=True)
     durationAdjacencyMatrix = readTravelDurations()
 
-    # print(durationAdjacencyMatrix)
+    # print(demands)
     pass
