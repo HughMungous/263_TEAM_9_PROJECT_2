@@ -45,7 +45,7 @@ if __name__ == "__main__":
     if runSouth:
         southDemands = {day: {location: demands[day][location] for location in locations['South']} for day in demands}
         
-        southernRoutesMonday = routing.RouteFinder(nodes=southDemands['Monday'], adjacencyMatrix=travelDurations)
+        southernRoutesMonday = routing.Region(nodes=southDemands['Monday'], adjacencyMatrix=travelDurations)
         print(southernRoutesMonday.findValidSubgraphs())
     # main()
     pass

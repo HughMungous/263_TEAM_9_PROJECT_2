@@ -32,7 +32,7 @@ def readAverageDemands()->Tuple[List[str], Dict[str, Dict[str, int]]]:
 
     return stores, res
     
-def readTravelDurations():
+def readTravelDurations()->pd.DataFrame:
     """Returns the adjacency matrix for the stores with the values converted to hours"""
     fileAddress = "./Data/WoolworthsTravelDurations.csv"
     

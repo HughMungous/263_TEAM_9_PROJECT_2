@@ -4,17 +4,17 @@ File for route creation algorithms.
 currently no implementation.
 """
 from dataclasses import dataclass
-from typing import Dict, List
-from random import randint, seed
+from typing import Dict, List, Any
+from random import randint, seed, sample
 
 @dataclass
-class RouteFinder:
+class Region:
     """Will change just keeping the work localised for now"""
     nodes: Dict[str, int] # node: demand - might change this later 
     adjacencyMatrix: List[List[int]] # durations between nodes: [i][j] = duration i to j
     maxDemand: int = 26
 
-    def generate(self, numbers: List[str], k: int):
+    def generate(self, numbers: List[Any], k: int)->List[Any]:
         """
         Generates combinations of numbers C k, preserves order.
         """
@@ -29,7 +29,7 @@ class RouteFinder:
 
         return ans
 
-    def findValidSubgraphs(self, maxNodes: int = 1):
+    def findValidSubgraphs(self)->Dict[int, List[Any]]:
         """
         Function to generate subgraphs for application of a TSP algorithm.
 
@@ -37,12 +37,55 @@ class RouteFinder:
         Performs recursive calls incrementing maxNodes until no viable subgraph
         exists.
         """
-        ans = [subGraph for subGraph in self.generate(list(self.nodes.keys()), maxNodes) if sum(self.nodes[node] for node in subGraph) <= 26]
-        if not ans: # checking whether any subGraphs passed the test
-            return []
-        return ans + self.findValidSubgraphs(maxNodes+1)
+        res = {}
+        def subFunc(maxNodes: int):
+            ans = [subGraph for subGraph in self.generate(list(self.nodes.keys()), maxNodes) if sum(self.nodes[node] for node in subGraph) <= 26]
+            if not ans: # checking whether any subGraphs passed the test
+                return []
+            return ans 
 
-       
+        i = 1
+        validAns = True
+        while validAns:
+            res[i] = subFunc(i)
+            if not res[i]:
+                del res[i]
+                validAns = False
+            i+=1
+        
+        return res         
+
+    def createPartitions(self, subGraphs: Dict[int, List[Any]], maxNumber: int, randomSeed: int = 100):
+        """Function to generate partitions of the region provided the valid subgraphs
+        
+        Parameters:
+            - havent decided on input typing yet
+        """
+        seed(randomSeed)
+        storesSet, numStores = set(self.nodes.keys()), len(self.nodes.keys())
+
+        ans = []
+        while maxNumber:
+            # choosing a random subgraph of random length to start with
+            key = randint(1, len(subGraphs.keys()))
+            current = [subGraphs[key][randint(0,len(subGraphs[key])-1)]]
+            cSet = set(current[0]) # maintaining a set for set operations
+            
+            while storesSet - cSet: # while we have not found a partition
+                # Going from the largest subGraps to the smallest
+                for i in range(min(numStores-len(cSet), max(subGraphs.keys())), 0, -1):
+                    # randomly sorting the possible graphs
+                    temp = sample(subGraphs[i], len(subGraphs[i]))
+                    for j in range(len(temp)):
+                        if cSet.isdisjoint(set(temp[j])):
+                            cSet |= set(temp[j]) # updating the set
+                            current.append(temp[j]) # updating the  current partition
+            ans.append(current)
+
+            maxNumber-=1
+        
+        return ans
+        
 
     def antColonyTSP(self, subGraph: List[int], iterationThreshold: int, numAnts: int, numNodes: int):
         """
@@ -93,7 +136,7 @@ class RouteFinder:
 from glob import glob
 if __name__ == "__main__":
     seed(508) # keep the tests the same
-
+    
     
 
     # nodes = {i: randint(4, 15) for i in range(10)}
