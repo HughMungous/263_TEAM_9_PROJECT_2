@@ -65,7 +65,8 @@ def main():
     pass
 
 if __name__ == "__main__":
-    day, region = 'Monday', 'Central'
+    day, region = 'Monday', 'South'
+    # day, region = input().split()
     routes = generateRoutes(day, region)
     regionalDemands = {location: demands[day][location] for location in locations[region]}
 
@@ -79,7 +80,7 @@ if __name__ == "__main__":
             # print(f"route:{partition},\t\t totalTime:{totalTime:.3f}")
             avg += totalTime
         print(f"Partition: {route}\nAverage duration for the partition: {avg/len(route):.3f}\nNum trucks: {len(route)}")
-    # main()
+    # # main()
     pass
 
 
