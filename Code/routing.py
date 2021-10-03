@@ -77,6 +77,8 @@ class Region:
             - havent decided on input typing yet
         """
         seed(randomSeed)
+        for k in subGraphs:
+            subGraphs[k].sort(key=self.centroidDistanceSquared)
 
         # creating sets
         storesSet, numStores = set(self.nodes.keys()), len(self.nodes.keys())
@@ -100,7 +102,7 @@ class Region:
                                 current.append(temp[j]) # updating the  current partition
 
                 else:
-                    # this isnt completely accurate yet
+                    # this isnt completely accurate yet - will continue to choose from the same row 
                     randomisedKeys = list(range(1, min(numStores-len(cSet), max(subGraphs.keys()))+1))
                     shuffle(randomisedKeys)
                     for i in randomisedKeys:
@@ -142,8 +144,9 @@ class Pathfinder:
         return visited
 
 
-import dataInput
 if __name__ == "__main__":
+    import dataInput
+    
     seed(508) # keep the tests the same
     
     depot = "Distribution Centre Auckland"
@@ -157,6 +160,6 @@ if __name__ == "__main__":
     validSubgraphs = southernRoutesMonday.findValidSubgraphs()
 
     for k in validSubgraphs:
-        print(f"route length:{k}, centroid distances: {[southernRoutesMonday.centroidDistanceSquared(r) for r in validSubgraphs[k]]}")
+        print(f"route length:{k}, centroid distances: {sorted([southernRoutesMonday.centroidDistanceSquared(r) for r in validSubgraphs[k]])}")
     
     pass
