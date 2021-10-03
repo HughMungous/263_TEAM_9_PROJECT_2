@@ -25,9 +25,21 @@ coordinates = dataInput.readStoreCoordinates()
 routeFinder = routing.Pathfinder(travelDurations)
 
 def generateRoutes(day: str, region: str, nPartitions:int=5):
-    """generates the TSP routes/partitions for a given day and region """
+    """generates the TSP routes/partitions for a given day and region 
+    
+    Parameter:
+    ---------
+    day: str
+        The day of the week (Monday - Saturday)
+    
+    region: str
+        The region (North, South, Central, West)
+
+    nPartitions: Optional[int] = 5
+        The number of partitions to be generated for the region
+    """
     # getting the specific demands for the day and region
-    regionalDemands = {location: demands[day][location] for location in locations['region']}
+    regionalDemands = {location: demands[day][location] for location in locations[region]}
         
     regionRoutingObj = routing.Region(nodes=regionalDemands, locations=coordinates)
 
@@ -53,14 +65,16 @@ def main():
     pass
 
 if __name__ == "__main__":
-    routes = generateRoutes('Monday', 'North')
+    day, region = 'Monday', 'Central'
+    routes = generateRoutes(day, region)
+    regionalDemands = {location: demands[day][location] for location in locations[region]}
 
     for route in routes:
         avg = 0
         for partition in route:
             totalTime = 0
             for i in range(len(partition)-1):
-                totalTime += travelDurations[partition[i]][partition[i+1]] + 0.125*southDemands['Monday'][partition[i+1]]
+                totalTime += travelDurations[partition[i]][partition[i+1]] + 0.125*regionalDemands[partition[i+1]]
                 totalTime += travelDurations[partition[-1]][depot]
             # print(f"route:{partition},\t\t totalTime:{totalTime:.3f}")
             avg += totalTime
