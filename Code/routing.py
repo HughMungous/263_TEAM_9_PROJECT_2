@@ -17,7 +17,7 @@ class Region:
     locations: pd.DataFrame
     maxDemand: int = 26
 
-    def generate(self, numbers: List[Any], k: int)->List[Any]:
+    def generate(self, numbers: List[str], k: int)->List[str]:
         """
         Generates combinations of numbers C k, preserves order.
         """
@@ -52,16 +52,13 @@ class Region:
             return [subGraph for subGraph in self.generate(list(self.nodes.keys()), maxNodes) if sum(self.nodes[node] for node in subGraph) <= 26]
 
         ## main generation loop
-        i, validAns = 1, True   # i tracks the size of the subgraphs we are currently generating
-        while validAns and i <= maxStops:
+        i = 1 # i tracks the size of the subgraphs we are currently generating
+        while  i <= maxStops:
             res[i] = getSubgraphs(i) 
-
-            if not res[i]: # if the answer is an empty array
-                del res[i]
-                validAns = False
-
+            
+            
             # if we wish to filter out the subgraphs with a large centroid distance
-            elif removeOutliers and i > 1:
+            if i > 1:
                 centroidDistances = [self.centroidDistanceSquared(g) for g in res[i]]
                 m = mean(centroidDistances)
 
@@ -72,6 +69,9 @@ class Region:
                 
                 res[i] = sorted(tempRes, key = self.centroidDistanceSquared) # updating the main result dict
             
+            if not res[i]:
+                del res[i]
+                break
             i+=1
         
         return res
@@ -96,8 +96,6 @@ class Region:
             - havent decided on input typing yet
         """
         seed(randomSeed)
-        # for k in subGraphs:
-        #     subGraphs[k].sort(key=self.centroidDistanceSquared)
 
         # creating sets
         storesSet, numStores = set(self.nodes.keys()), len(self.nodes.keys())
@@ -107,6 +105,7 @@ class Region:
             # choosing a random subgraph of random length to start with
             key = randint(1, len(subGraphs.keys()))
             current = [subGraphs[key][randint(0,len(subGraphs[key])-1)]]
+
             cSet = set(current[0]) # maintaining a set for set operations
             
             while storesSet - cSet: # while we have not found a partition
