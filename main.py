@@ -1,6 +1,6 @@
 
 ## module imports
-from Code import routing, dataInput
+from Code import routing, dataInput, linearProgram
 
 # data handling
 import numpy as np
@@ -24,7 +24,7 @@ coordinates = dataInput.readStoreCoordinates()
 
 routeFinder = routing.Pathfinder(travelDurations)
 
-def generateRoutes(day: str, region: str, nPartitions:int=5):
+def generateRoutes(day: str, region: str, nPartitions:int=5, removeOutliers=0.5, maxStops=4):
     """generates the TSP routes/partitions for a given day and region 
     
     Parameter:
@@ -39,11 +39,12 @@ def generateRoutes(day: str, region: str, nPartitions:int=5):
         The number of partitions to be generated for the region
     """
     # getting the specific demands for the day and region
-    regionalDemands = {location: demands[day][location] for location in locations[region]}
+    regionalDemands = {location: demands[day][location] for location in locations[region] if demands[day][location] != 0}
         
     regionRoutingObj = routing.Region(nodes=regionalDemands, locations=coordinates)
 
-    validSubgraphs = regionRoutingObj.findValidSubgraphs(0.4)
+    validSubgraphs = regionRoutingObj.findValidSubgraphs(removeOutliers=removeOutliers, maxStops=maxStops)
+    
     partitions = regionRoutingObj.createPartitions(validSubgraphs, nPartitions)
     
     routes = []
@@ -66,65 +67,41 @@ def calculateDuration(route, day):
 
 
 
-def main():
+def main(numRoutes: int):
     """
     This function will handle calling the other functions as well as plotting.
     """
-    pass
+    for day in ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']:
+        partitions, partitionDurations = {}, {}
+        for region in ['North','West','Central','South']:
+            partitions[region] = []
+            partitionDurations[region] = []
+
+            temporaryPartitions = generateRoutes(day, region, numRoutes, removeOutliers=1, maxStops=5)
+
+            for partition in temporaryPartitions:
+                tempRoutes = []
+                tempDurations = []
+
+                for route in partition:
+                    tempRoutes.append(route)
+                    tempDurations.append(calculateDuration(route, day))
+                partitions[region].append(tempRoutes)
+                partitionDurations[region].append(tempDurations)
+        
+        result, optimalParts = linearProgram.solve(day, partitions=partitions, durations=partitionDurations)
+        
+        print(f"Optimal solution for {day}: {result:.3f}")
+        
+        dataInput.storeRoutes({region: partitions[region][optimalParts[region]] for region in optimalParts}, f'Solutions/{day}Solution.json')
+
 
 if __name__ == "__main__":
-    cost = lambda x: 225*x + 50*max(0,x-4)
-    day = 'Monday'
+    numRoutes = int(input("Please enter the maximum number of partitions to be generated for each region:"))
+    main(numRoutes=numRoutes)
+
     
-    results = {}
-    # for region in ['North','West','Central','South']:
-    #     results[region] = []
-
-    #     partitions = generateRoutes(day, region, 5)
-        
-
-    #     for partition in partitions:
-    #         temp = []
-    #         for route in partition:
-    #             temp.append((route,calculateDuration(route, day)))
-    #         results[region].append(temp)
-
-    for region in ['North','West','Central','South']:
-        results[region] = []
-
-        partitions = generateRoutes(day, region, 5)
-        
-        cMin = float('inf')
-        for partition in partitions:
-            tMin = 0
-            temp = []
-            for route in partition:
-                temp.append(route)
-                dur = calculateDuration(route, day)
-                tMin += cost(dur)
-            
-            if tMin < cMin:
-                cMin = tMin
-                results[region]= temp[:]
-        
-
-    # dataInput.storeRoutes(results, f'Data/Routes/{i}RoutesPerRegion.json')
-    # dataInput.storeRoutes(results,'Data/Routes/mondayExample.json')
-    # results = dataInput.readRoutes()
-
-    # for region in results:
-    #     print(f"\nRegion: {region}")
-    #     for i in range(len(results[region])):
-    #         tempDuration = [calculateDuration(t, day) for t in results[region][i]]
-    #         print(f"{i}: {sum(tempDuration)/len(tempDuration):.3f}, {len(tempDuration)}, {[f'{d:.3f}' for d in tempDuration]}")
     
-    for region in results:
-        print(f"\nRegion: {region}")
-        
-        tempDuration = [calculateDuration(t, day) for t in results[region]]
-        
-        print(f"{sum(tempDuration)/len(tempDuration):.2f}, {len(tempDuration)}, {[f'time: {d:.2f}, cost:{cost(d):.2f}' for d in tempDuration]}")
-
     
 
 
