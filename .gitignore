@@ -1,4 +1,10 @@
 
+# user files
 *.pdf
 
+# vscode debuggin files
 .vscode
+
+# compiled python
+*.pyc
+__pycache__/
