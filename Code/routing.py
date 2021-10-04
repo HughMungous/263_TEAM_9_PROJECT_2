@@ -32,36 +32,46 @@ class Region:
 
         return ans
 
-    def findValidSubgraphs(self, removeOutliers: float = 0.5)->Dict[int, List[Any]]:
+    def findValidSubgraphs(self, removeOutliers: float = 0.5, maxStops: int = 3)->Dict[int, List[Any]]:
         """
         Function to generate subgraphs for application of a TSP algorithm.
 
         Finds subgraphs of size(maxNodes) from the nodes in a graph.
         Performs recursive calls incrementing maxNodes until no viable subgraph
         exists.
+
+        Parameters:
+        -----------
+            removeOutliers: float = 0.5
+                This controls the extent to which we filter out large subgroup 
         """
-        res = {}
-        def subFunc(maxNodes: int):
-            ans = [subGraph for subGraph in self.generate(list(self.nodes.keys()), maxNodes) if sum(self.nodes[node] for node in subGraph) <= 26]
+        res = {} # dictionairy to store the valid subgraphs, with the length as keys
+        
+        # sub function to generate valid subgraphs of a set size
+        def getSubgraphs(maxNodes: int):
+            return [subGraph for subGraph in self.generate(list(self.nodes.keys()), maxNodes) if sum(self.nodes[node] for node in subGraph) <= 26]
 
-            if not ans: # checking whether any subGraphs passed the test
-                return []
-            return ans 
+        ## main generation loop
+        i, validAns = 1, True   # i tracks the size of the subgraphs we are currently generating
+        while validAns and i <= maxStops:
+            res[i] = getSubgraphs(i) 
 
-        i = 1
-        validAns = True
-        while validAns:
-            res[i] = subFunc(i)
-            if not res[i]:
+            if not res[i]: # if the answer is an empty array
                 del res[i]
                 validAns = False
+
+            # if we wish to filter out the subgraphs with a large centroid distance
             elif removeOutliers and i > 1:
                 centroidDistances = [self.centroidDistanceSquared(g) for g in res[i]]
                 m = mean(centroidDistances)
-                tempRes = []
-                for j in range(len(res[i])):
-                    if centroidDistances[j] <= removeOutliers*m: tempRes.append(res[i][j])
-                res[i] = sorted(tempRes, key = self.centroidDistanceSquared)
+
+                tempRes = [] # storing the valid subgraphs in the temporary result
+                for j in range(len(res[i])): 
+                    if centroidDistances[j] <= removeOutliers * m: 
+                        tempRes.append(res[i][j])
+                
+                res[i] = sorted(tempRes, key = self.centroidDistanceSquared) # updating the main result dict
+            
             i+=1
         
         return res
@@ -79,7 +89,7 @@ class Region:
         return sum([(self.locations['Lat'][store]-centroidLat)**2 + (self.locations['Long'][store]-centroidLong)**2])/len(stores)
 
 
-    def createPartitions(self, subGraphs: Dict[int, List[Any]], maxNumber: int, randomSeed: int = 100, randomly: bool = False):
+    def createPartitions(self, subGraphs: Dict[int, List[Any]], maxNumber: int, randomSeed: int = 100):
         """Function to generate partitions of the region provided the valid subgraphs
         
         Parameters:
@@ -101,34 +111,20 @@ class Region:
             
             while storesSet - cSet: # while we have not found a partition
                 # Going from the largest subGraps to the smallest
-                if not randomly:
-                    for i in range(min(numStores-len(cSet), max(subGraphs.keys())), 0, -1):
-                        # randomly sorting the possible graphs
-                        counter = 0
-                        temp = sample(subGraphs[i], len(subGraphs[i]))
-                        for j in range(len(temp)):
-                            if cSet.isdisjoint(set(temp[j])):
-                                cSet |= set(temp[j]) # updating the set
-                                current.append(temp[j]) # updating the  current partition
-                                if i > 2: 
-                                    counter = counter + 1
-                                if counter >= 2:
-                                    break
-                            
-                            
-
-                else:
-                    # this isnt completely accurate yet - will continue to choose from the same row 
-                    randomisedKeys = list(range(1, min(numStores-len(cSet), max(subGraphs.keys()))+1))
-                    shuffle(randomisedKeys)
-                    for i in randomisedKeys:
+                
+                for i in range(min(numStores-len(cSet), max(subGraphs.keys())), 0, -1):
+                    # randomly sorting the possible graphs
+                    # counter = 0
+                    # temp = sample(subGraphs[i], len(subGraphs[i]))
                     
-                        # randomly sorting the possible graphs
-                        temp = sample(subGraphs[i], len(subGraphs[i]))
-                        for j in range(len(temp)):
-                            if cSet.isdisjoint(set(temp[j])):
-                                cSet |= set(temp[j]) # updating the set
-                                current.append(temp[j]) # updating the  current partition
+                    for j in range(len(subGraphs[i])):
+                        if cSet.isdisjoint(set(subGraphs[i][j])):
+                            cSet |= set(subGraphs[i][j]) # updating the set
+                            current.append(subGraphs[i][j]) # updating the  current partition
+                            # if i > 2: 
+                            #     counter += 1
+                            #     if counter > 4:
+                            #         break
 
             ans.append(current)
 
