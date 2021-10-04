@@ -13,6 +13,7 @@ from matplotlib import pyplot as plt
 # import seaborn as sns
 
 # type handling
+import json
 # from typing import List
 
 # global variables: dont edit please 🙏
@@ -43,7 +44,7 @@ def generateRoutes(day: str, region: str, nPartitions:int=5):
         
     regionRoutingObj = routing.Region(nodes=regionalDemands, locations=coordinates)
 
-    validSubgraphs = regionRoutingObj.findValidSubgraphs()
+    validSubgraphs = regionRoutingObj.findValidSubgraphs(0.4)
     partitions = regionRoutingObj.createPartitions(validSubgraphs, nPartitions)
     
     routes = []
@@ -57,6 +58,14 @@ def generateRoutes(day: str, region: str, nPartitions:int=5):
 
     return routes
     
+def calculateDuration(route, day):
+    ans = 0
+    for i in range(len(route)-1):
+        ans += travelDurations[route[i]][route[i+1]]
+        ans += 0.125*demands[day][route[i+1]]
+    return ans + travelDurations[route[-1]][depot]
+
+
 
 def main():
     """
@@ -65,22 +74,25 @@ def main():
     pass
 
 if __name__ == "__main__":
-    day, region = 'Monday', 'South'
-    # day, region = input().split()
-    routes = generateRoutes(day, region)
-    regionalDemands = {location: demands[day][location] for location in locations[region]}
+    day = 'Monday'
+    
+    
+    
+    results = {}
+    for region in ['North','West','Central','South']:
+        results[region] = []
 
-    for route in routes:
-        avg = 0
-        for partition in route:
-            totalTime = 0
-            for i in range(len(partition)-1):
-                totalTime += travelDurations[partition[i]][partition[i+1]] + 0.125*regionalDemands[partition[i+1]]
-                totalTime += travelDurations[partition[-1]][depot]
-            # print(f"route:{partition},\t\t totalTime:{totalTime:.3f}")
-            avg += totalTime
-        print(f"Partition: {route}\nAverage duration for the partition: {avg/len(route):.3f}\nNum trucks: {len(route)}")
-    # # main()
-    pass
+        partitions = generateRoutes(day, region)
+        regionalDemands = {location: demands[day][location] for location in locations[region]}
+
+        for partition in partitions:
+            temp = []
+            for route in partition:
+                temp.append((route,calculateDuration(route, day)))
+            results[region].append(temp)
+
+    dataInput.storeRoutes(results)
+
+    
 
 
