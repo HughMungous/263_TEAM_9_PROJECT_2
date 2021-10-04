@@ -3,6 +3,7 @@
 # from glob import glob
 import numpy as np
 import pandas as pd
+import json
 
 from typing import Dict, List, Tuple
 
@@ -44,7 +45,40 @@ def readStoreCoordinates(fileAddress: str = "./Data/WoolworthsLocations.csv")->p
     
     return pd.read_csv(fileAddress, sep=",",usecols=['Store','Lat','Long']).set_index('Store')
     
-    
+def storeRoutes(partitions, fileAddress='Data/newRoutes.json'):
+    """
+    Converts routes to a JSON file
+
+    Parameters:
+    ----------
+        partitions: Dict[str, List[List[Tuple(List[str],float)]]]
+            The partitions for each region
+        
+        fileAddress: str
+            name of the file to store the data in, should be a json
+    """
+    fp = open(fileAddress, mode='w')
+
+    json.dump(partitions,fp)
+    fp.close()
+    return
+
+def readRoutes(fileAddress='Data/newRoutes.json'):
+    """
+    Reads in a dict of routes stored as a JSON using storeRoute()
+
+    Parameters:
+    ----------
+        fileAddress: str
+            ...
+    """
+    fp = open(fileAddress, mode='r')
+
+    temp = json.load(fp)
+    fp.close()
+    return temp
+
+
 
 if __name__=="__main__":
     # groups = readLocationGroups()
