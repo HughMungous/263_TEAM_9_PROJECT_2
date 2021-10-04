@@ -77,20 +77,28 @@ if __name__ == "__main__":
     
     
     
-    results = {}
-    for region in ['North','West','Central','South']:
-        results[region] = []
+    # results = {}
+    # for region in ['North','West','Central','South']:
+    #     results[region] = []
 
-        partitions = generateRoutes(day, region)
-        regionalDemands = {location: demands[day][location] for location in locations[region]}
+    #     partitions = generateRoutes(day, region)
+    #     regionalDemands = {location: demands[day][location] for location in locations[region]}
 
-        for partition in partitions:
-            temp = []
-            for route in partition:
-                temp.append((route,calculateDuration(route, day)))
-            results[region].append(temp)
+    #     for partition in partitions:
+    #         temp = []
+    #         for route in partition:
+    #             temp.append((route,calculateDuration(route, day)))
+    #         results[region].append(temp)
 
-    dataInput.storeRoutes(results)
+    # dataInput.storeRoutes(results)
+
+    routes = dataInput.readRoutes()
+
+    for region in routes:
+        print(f"Region: {region}")
+        for i in range(len(routes[region])):
+            print(f"{i}: {[f'{t[1]:.3f}' for t in routes[region][i]]}")
+    pass
 
     
 
