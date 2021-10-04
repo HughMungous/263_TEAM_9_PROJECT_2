@@ -17,12 +17,15 @@ from matplotlib import pyplot as plt
 
 # global variables: dont edit please 🙏
 depot = "Distribution Centre Auckland"
+
 locations = dataInput.readLocationGroups()
 stores, demands = dataInput.readAverageDemands(roundUp=True)
 travelDurations = dataInput.readTravelDurations()
 coordinates = dataInput.readStoreCoordinates()
 
 routeFinder = routing.Pathfinder(travelDurations)
+
+cost = lambda x: 225*x + 50*max(0,x-4)
 
 def generateRoutes(day: str, region: str, nPartitions:int=5, removeOutliers=0.5, maxStops=4):
     """generates the TSP routes/partitions for a given day and region 
@@ -97,8 +100,18 @@ def main(numRoutes: int):
 
 
 if __name__ == "__main__":
-    numRoutes = int(input("Please enter the maximum number of partitions to be generated for each region:"))
-    main(numRoutes=numRoutes)
+    if input("Run linear program? (Y/N) ") in 'yY':
+        numRoutes = int(input("Please enter the maximum number of partitions to be generated for each region:"))
+        main(numRoutes=numRoutes)
+
+    for dataJSON in glob("Solutions/*.json"):
+        tempDict = dataInput.readRoutes(dataJSON)
+        day = dataJSON[dataJSON.index('/')+1:dataJSON.index('.')-8]
+        print(f"Day: {day}")
+        print(f"number of trucks: {sum([len(tempDict[region]) for region in tempDict])}")
+        print(f"Total cost: {sum([cost(calculateDuration(route,day)) for region in tempDict for route in tempDict[region]]):.3f}")
+        print("\n")
+        
 
     
     
