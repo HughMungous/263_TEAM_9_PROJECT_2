@@ -77,28 +77,30 @@ if __name__ == "__main__":
     
     
     
-    # results = {}
-    # for region in ['North','West','Central','South']:
-    #     results[region] = []
+    results = {}
+    for region in ['North','West','Central','South'][:1]:
+        results[region] = []
 
-    #     partitions = generateRoutes(day, region)
-    #     regionalDemands = {location: demands[day][location] for location in locations[region]}
+        partitions = generateRoutes(day, region, 5)
+        regionalDemands = {location: demands[day][location] for location in locations[region]}
 
-    #     for partition in partitions:
-    #         temp = []
-    #         for route in partition:
-    #             temp.append((route,calculateDuration(route, day)))
-    #         results[region].append(temp)
+        for partition in partitions:
+            temp = []
+            for route in partition:
+                temp.append((route,calculateDuration(route, day)))
+            results[region].append(temp)
+    print(results)
 
-    # dataInput.storeRoutes(results)
+    # dataInput.storeRoutes(results, f'Data/Routes/{i}RoutesPerRegion.json')
 
-    routes = dataInput.readRoutes()
+    # results = dataInput.readRoutes()
 
-    for region in routes:
-        print(f"Region: {region}")
-        for i in range(len(routes[region])):
-            print(f"{i}: {[f'{t[1]:.3f}' for t in routes[region][i]]}")
-    pass
+    # for region in results:
+    #     print(f"\nRegion: {region}")
+    #     for i in range(len(results[region])):
+    #         tempDuration = [t[1] for t in results[region][i]]
+    #         print(f"{i}: {sum(tempDuration)/len(tempDuration):.3f}, {len(tempDuration)}, {[f'{d:.3f}' for d in tempDuration]}")
+    
 
     
 
