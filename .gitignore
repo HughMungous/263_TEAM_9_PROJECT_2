@@ -1,6 +1,7 @@
 
 # user files
 *.pdf
+.DS_Store
 
 # vscode debuggin files
 .vscode
