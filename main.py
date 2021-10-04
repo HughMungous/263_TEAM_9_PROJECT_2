@@ -13,7 +13,6 @@ from matplotlib import pyplot as plt
 # import seaborn as sns
 
 # type handling
-import json
 # from typing import List
 
 # global variables: dont edit please 🙏
