@@ -104,13 +104,15 @@ if __name__ == "__main__":
         numRoutes = int(input("Please enter the maximum number of partitions to be generated for each region:"))
         main(numRoutes=numRoutes)
 
-    for dataJSON in glob("Solutions/*.json"):
-        tempDict = dataInput.readRoutes(dataJSON)
-        day = dataJSON[dataJSON.index('/')+1:dataJSON.index('.')-8]
-        print(f"Day: {day}")
-        print(f"number of trucks: {sum([len(tempDict[region]) for region in tempDict])}")
-        print(f"Total cost: {sum([cost(calculateDuration(route,day)) for region in tempDict for route in tempDict[region]]):.3f}")
-        print("\n")
+    if input("View results? (Y/N) ") in 'yY':
+        for day in ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']:
+            dataJSON = f"Solutions/{day}Solution.json"
+            tempDict = dataInput.readRoutes(dataJSON)
+            day = dataJSON[dataJSON.index('/')+1:dataJSON.index('.')-8]
+            print(f"\nDay: {day}\n")
+            print(f"number of trucks: {sum([len(tempDict[region]) for region in tempDict])}")
+            print(f"Total cost: {sum([cost(calculateDuration(route,day)) for region in tempDict for route in tempDict[region]]):.3f}\n")
+            
         
 
     

@@ -4,7 +4,7 @@ import numpy as np
 from pulp import *
 
 from Code import dataInput, routing
-
+from typing import List
 ## Data Input
 # globalDay = 'Monday'
 depot = "Distribution Centre Auckland"
@@ -61,7 +61,8 @@ def eliminatePoorRoutes(routes, percentageToKeep: float = 0.5, minLenToKeep: int
     
     return ans
 
-def findBestPartition(day: str, region: str, routes, stores, durations, maxTrucks: int = 60):
+def findBestPartition(day: str, region: str, routes: List[List[str]], stores: List[str], durations: List[float], maxTrucks: int = 60, disp = False):
+    
     # variable for whether a route is chosen 
     possibleRoutes = [LpVariable(region+f"_route_{i}", 0, 1, LpInteger) for i in range(len(routes))]
     
@@ -84,64 +85,95 @@ def findBestPartition(day: str, region: str, routes, stores, durations, maxTruck
             f"Must_supply_{store}",
         )
 
-    routing_model.solve()
+    routing_model.solve(PULP_CBC_CMD(msg=0))
 
     routesChosen = []
-    print("The choosen routes are out of a total of %s:" % len(possibleRoutes))
+    if disp: 
+        print("The choosen routes are out of a total of %s:" % len(possibleRoutes))
     for i in range(len(routes)):
         if possibleRoutes[i].value() == 1.0:
-            print(routes[i])
+            if disp:
+                print(routes[i])
             routesChosen.append(routes[i])
 
-    return routesChosen
+    return routesChosen, LpStatus[routing_model.status] == "Optimal"
+
+class LP_NOT_OPTIMAL(Exception):
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
 
 if __name__=="__main__":
+    
     if input("Generate routes? (Y/N): ") in 'yY':
+        autosave = input("Enable automatic saving? (Y/N) ") in 'yY'
         for day in ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']:
+            
             # day = input("Which day would you like to model? ")
             globalDay = day
 
             solution = {}
             # region = input("Which region would you like to model? ")
+            solStatus = True
             for region in ['North', 'West', 'South', 'Central']:
-                routes = getRoutes(day, region, removeOutliers=0.5, maxStops=3)
+                
+                routes = getRoutes(day, region, removeOutliers=1, maxStops=5)
                 
                 # toExclude = float(input("Which proportion of routes should be kept: [0-1]"))
-                toExclude = 1.1
-                routes = eliminatePoorRoutes(routes, toExclude)
-                temp = findBestPartition(day, region, routes, [location for location in locations[region] if demands[day][location] != 0], [calculateDuration(route) for route in routes])
+                # toExclude = 1.1
+                # routes = eliminatePoorRoutes(routes, toExclude)
+                temp, probStatus = findBestPartition(day, region, routes, [location for location in locations[region] if demands[day][location] != 0], [calculateDuration(route) for route in routes])
                 solution[region] = temp
+                solStatus = solStatus and probStatus
 
-            if input("Save results? (Y/N) ") in 'yY':
+            if not solStatus:
+                raise LP_NOT_OPTIMAL(f"\033[93mThe solution for {day} was not optimal\033[0m")
+            if autosave:
+                dataInput.storeRoutes(solution, f'nonPartitionedSolutions/{day}.json')
+            elif input("Save results? (Y/N) ") in 'yY':
                 dataInput.storeRoutes(solution, f'nonPartitionedSolutions/{day}.json')
 
-    elif input("Calculate solution values for saved solutions? (Y/N) ") in 'yY':
-        verbose = False
-        if input("Would you like a detailed output of the routes chosen? (Y/N) ") in 'yY':
-            verbose = True
+    if input("Calculate solution values for saved solutions? (Y/N) ") in 'yY':
+        if input("Would you like to examine a specific day? (Y/N) ") in 'yY':
+            verbose = False
+            if input("Would you like a detailed output of the routes chosen? (Y/N) ") in 'yY':
+                verbose = True
 
-        day = input("Which day would you like to examine? ")
-        globalDay = day
+            day = input("Which day would you like to examine? ")
+            globalDay = day
 
-        totalCost, totalTrucks = 0,0
+            totalCost, totalTrucks = 0,0
+            data = dataInput.readRoutes(f'nonPartitionedSolutions/{day}.json')
 
+            print(f"Day: {day}")
+            for region in ['North','West','Central','South']:
+                
+                tempCost, tempTrucks = sum([cost(calculateDuration(route)) for route in data[region]]), len(data[region])
+
+                print(f"\n\nRegion: {region}")
+                print(f"Number of trucks used: {tempTrucks}")
+                print(f"Total cost: {tempCost:.3f}")
+
+                if verbose:
+                    print("\n\t\tRoutes:\n\t\t------")
+                    for route in data[region]:
+                        print(f"route: {route}, duration: {calculateDuration(route):.3f}, cost: {cost(calculateDuration(route)):.3f}")
+
+                totalCost += tempCost
+                totalTrucks += tempTrucks
         
-        print(f"Day: {day}")
-        for region in ['North','West','Central','South']:
-            temp = dataInput.readRoutes(f'nonPartitionedSolutions/{day}{region}.json')
-            tempCost, tempTrucks = sum([cost(calculateDuration(route)) for route in temp]), len(temp)
+        else:
+            for day in ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']:
+                globalDay = day
 
-            print(f"\n\nRegion: {region}")
-            print(f"Number of trucks used: {tempTrucks}")
-            print(f"Total cost: {tempCost:.3f}")
+                totalCost, totalTrucks = 0,0
+                data = dataInput.readRoutes(f'nonPartitionedSolutions/{day}.json')
 
-            if verbose:
-                print("\n\t\tRoutes:\n\t\t------")
-                for route in temp:
-                    print(f"route: {route}, duration: {calculateDuration(route):.3f}, cost: {cost(calculateDuration(route)):.3f}")
+                print(f"\nDay: {day}")
+                for region in ['North','West','Central','South']:
 
-            totalCost += tempCost
-            totalTrucks += tempTrucks
+                    totalCost += sum([cost(calculateDuration(route)) for route in data[region]])
+                    totalTrucks += len(data[region])
 
-        print(f"\n\nTotal cost for {day}: {totalCost:.3f}")
-        print(f"Number of trucks for {day}: {totalTrucks}\n\n")
+                print(f"\nTotal cost for {day}: {totalCost:.3f}")
+                print(f"Number of trucks for {day}: {totalTrucks}\n")
