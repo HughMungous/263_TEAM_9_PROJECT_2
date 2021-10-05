@@ -61,7 +61,7 @@ def eliminatePoorRoutes(routes, percentageToKeep: float = 0.5, minLenToKeep: int
     
     return ans
 
-def findBestPartition(day: str, region: str, routes, stores, durations, maxTrucks: int = 10):
+def findBestPartition(day: str, region: str, routes, stores, durations, maxTrucks: int = 60):
     # variable for whether a route is chosen 
     possibleRoutes = [LpVariable(region+f"_route_{i}", 0, 1, LpInteger) for i in range(len(routes))]
     
@@ -108,7 +108,7 @@ if __name__=="__main__":
                 
                 # toExclude = float(input("Which proportion of routes should be kept: [0-1]"))
                 toExclude = 1.1
-                northMonday = eliminatePoorRoutes(routes, toExclude)
+                routes = eliminatePoorRoutes(routes, toExclude)
                 temp = findBestPartition(day, region, routes, [location for location in locations[region] if demands[day][location] != 0], [calculateDuration(route) for route in routes])
                 solution[region] = temp
 
