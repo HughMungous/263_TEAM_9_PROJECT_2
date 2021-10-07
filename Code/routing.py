@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Any, Union
 from random import randint, seed, sample, shuffle
 
+
 @dataclass
 class Region:
     """Will change just keeping the work localised for now"""
