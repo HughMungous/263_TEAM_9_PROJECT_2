@@ -27,6 +27,7 @@ def readAverageDemands(fileAddress: str = "./Data/AverageDemands.csv", roundUp: 
     """Returns the list of all stores and the demands for all stores from monday to saturday"""
     
     averageDemands = pd.read_csv(fileAddress, sep=',',index_col=0)
+    averageDemands['WeekdayAvg'] = averageDemands[['Monday','Tuesday','Wednesday','Thursday','Friday']].mean(numeric_only=True, axis=1)
 
     stores = averageDemands.index
     if roundUp:
