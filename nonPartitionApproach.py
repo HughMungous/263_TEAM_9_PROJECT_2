@@ -43,9 +43,7 @@ def getRoutes(day: str, region: str, removeOutliers: float = 0.4, maxStops: int 
 
     return routes
 
-def eliminatePoorRoutes(routes, percentageToKeep: float = 0.5, minLenToKeep: int = 3):
-    if percentageToKeep >= 1: return routes
-
+def eliminatePoorRoutes(routes, minLenToKeep: int = 2, maxDuration: float = 6.0):
     temp = {}
     for route in routes:
         if len(route) not in temp:
@@ -56,12 +54,15 @@ def eliminatePoorRoutes(routes, percentageToKeep: float = 0.5, minLenToKeep: int
     for k in temp:
         if k > minLenToKeep:
             temp[k].sort(key=calculateDuration)
-            temp[k] = temp[k][:int(len(temp[k])*percentageToKeep)]
+            for i in range(len(temp[k])): # can be improved with binary search
+                if calculateDuration(temp[k][i]) > maxDuration:
+                    temp[k] = temp[k][:i]
+                    break
         ans.extend(temp[k])
     
     return ans
 
-def findBestPartition(day: str, region: str, routes: List[List[str]], stores: List[str], durations: List[float], maxTrucks: int = 60, disp = False):
+def findBestPartition(day: str, region: str, routes: List[List[str]], stores: List[str], durations: List[float], maxTrucks: int = 60, disp:bool = False):
     
     # variable for whether a route is chosen 
     possibleRoutes = [LpVariable(region+f"_route_{i}", 0, 1, LpInteger) for i in range(len(routes))]
@@ -85,7 +86,7 @@ def findBestPartition(day: str, region: str, routes: List[List[str]], stores: Li
             f"Must_supply_{store}",
         )
 
-    routing_model.solve(PULP_CBC_CMD(msg=0))
+    routing_model.solve(PULP_CBC_CMD(msg=disp))
 
     routesChosen = []
     if disp: 
@@ -106,23 +107,37 @@ class LP_NOT_OPTIMAL(Exception):
 if __name__=="__main__":
     
     if input("Generate routes? (Y/N): ") in 'yY':
+        disp = input("Display LP output? (Y/N) ") in 'yY'
         autosave = input("Enable automatic saving? (Y/N) ") in 'yY'
-        for day in ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']:
+        
+        # for day in ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']:
+        for day in ['WeekdayAvg']:
+        
             
             # day = input("Which day would you like to model? ")
             globalDay = day
+            maxStops, toExclude = 6, 6
 
+            # if input("Would you like to set a maximum route duration? (Y/N) ") in 'yY':
+            #     toExclude = float(input("Please enter a maximum route duration: "))
+
+            # if input("Would you like to set a maximum number of supermarkets per route? (Y/N) ") in 'yY':
+            #     maxStops = int(input("Please enter a supermarket limit: "))
+
+            
             solution = {}
             # region = input("Which region would you like to model? ")
             solStatus = True
             for region in ['North', 'West', 'South', 'Central']:
                 
-                routes = getRoutes(day, region, removeOutliers=1, maxStops=5)
+                routes = getRoutes(day, region, removeOutliers=1, maxStops=maxStops)
                 
-                # toExclude = float(input("Which proportion of routes should be kept: [0-1]"))
+                
+                if toExclude >= 0:
                 # toExclude = 1.1
-                # routes = eliminatePoorRoutes(routes, toExclude)
-                temp, probStatus = findBestPartition(day, region, routes, [location for location in locations[region] if demands[day][location] != 0], [calculateDuration(route) for route in routes])
+                    routes = eliminatePoorRoutes(routes,maxDuration=toExclude)
+                
+                temp, probStatus = findBestPartition(day, region, routes, [location for location in locations[region] if demands[day][location] != 0], [calculateDuration(route) for route in routes], disp=disp)
                 solution[region] = temp
                 solStatus = solStatus and probStatus
 
@@ -163,7 +178,7 @@ if __name__=="__main__":
                 totalTrucks += tempTrucks
         
         else:
-            for day in ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']:
+            for day in ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday', 'WeekdayAvg']:
                 globalDay = day
 
                 totalCost, totalTrucks = 0,0
