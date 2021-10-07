@@ -100,19 +100,43 @@ def main(numRoutes: int):
 
 
 if __name__ == "__main__":
+    ## comment/unccomment for route duration and cost to be stored as jsons
+    # for day in ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']:
+    #     tempData = dataInput.readRoutes(f'nonPartitionedSolutions/{day}.json')
+    #     tempDurations = {}
+    #     tempCosts = {}
+    #     for region in ['North','West','Central','South']:
+    #         tempDurations[region] = []
+    #         tempCosts[region] = []
+    #         for route in tempData[region]:
+    #             tempDurations[region].append(calculateDuration(route, day))
+    #             tempCosts[region].append(cost(tempDurations[region][-1]))
+        
+    #     dataInput.storeRoutes(tempDurations, f'DurationAndCostSolutions/{day}Durations.json')
+    #     dataInput.storeRoutes(tempCosts, f'DurationAndCostSolutions/{day}Costs.json')
+
+
+    # exit()
     if input("Run linear program? (Y/N) ") in 'yY':
         numRoutes = int(input("Please enter the maximum number of partitions to be generated for each region:"))
         main(numRoutes=numRoutes)
 
     if input("View results? (Y/N) ") in 'yY':
         for day in ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']:
-            dataJSON = f"Solutions/{day}Solution.json"
-            tempDict = dataInput.readRoutes(dataJSON)
-            day = dataJSON[dataJSON.index('/')+1:dataJSON.index('.')-8]
-            print(f"\nDay: {day}\n")
+            badSolution = f"Solutions/{day}Solution.json"
+            goodSolution = f"nonPartitionedSolutions/{day}.json"
+            tempDict = dataInput.readRoutes(badSolution)
+            tempDict2 = dataInput.readRoutes(goodSolution)
+            
+            print(f"\n\t\t{day}\n\t\t{'-'*len(day)}\n")
+
+            print("Partially Randomised Partitioning:")
             print(f"number of trucks: {sum([len(tempDict[region]) for region in tempDict])}")
             print(f"Total cost: {sum([cost(calculateDuration(route,day)) for region in tempDict for route in tempDict[region]]):.3f}\n")
-            
+
+            print(f"LP Optimised Partitioning:")
+            print(f"number of trucks: {sum([len(tempDict2[region]) for region in tempDict2])}")
+            print(f"Total cost: {sum([cost(calculateDuration(route,day)) for region in tempDict2 for route in tempDict2[region]]):.3f}\n")
         
 
     
