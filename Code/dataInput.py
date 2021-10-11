@@ -1,6 +1,7 @@
 """script to contain data input"""
 
 # from glob import glob
+import datetime
 import numpy as np
 import pandas as pd
 import json
@@ -79,14 +80,38 @@ def readRoutes(fileAddress='Data/newRoutes.json'):
     fp.close()
     return temp
 
+def readDataWithStats(fileAddress: str = 'Data/WoolworthsDemands.csv'):
+    df = pd.read_csv(fileAddress).set_index('Store')
+    df.columns = pd.to_datetime(df.columns)
+    
+    validDays = [d for d in df.columns if d.weekday() < 5] # weekday columns
+    # print(df[:5])
+    demands = df.loc[:,validDays].mean(axis=1)
+    mins    = df.loc[:,validDays].min(axis=1)
+    medians   = df.loc[:,validDays].median(axis=1)
+    maxs    = df.loc[:,validDays].max(axis=1)
+    # print(maxs[:5])
+    
+    newDf = pd.DataFrame(columns=["Store", "Demand", "min", "max", "median"])
+    newDf["Store"] = df.index
+    newDf.set_index("Store")
 
+    newDf["Demand"] = demands.values
+    newDf["min"] = mins.values
+    newDf["median"] = medians.values
+    newDf["max"] = maxs.values
+
+    # print(newDf[:5])
+    
+    return newDf
 
 if __name__=="__main__":
     # groups = readLocationGroups()
     # stores, demands = readAverageDemands(roundUp=True)
     # durationAdjacencyMatrix = readTravelDurations()
-    locations = readStoreCoordinates()
-    print(locations.head())
-    print(locations.columns)
+    # locations = readStoreCoordinates()
+    # print(locations.head())
+    # print(locations.columns)
     # print(demands)
+    readDataWithStats()
     pass
