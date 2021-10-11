@@ -40,5 +40,9 @@ def simulateDurations():
     pass
 
 
+def checkRoute():
+    """needs to check demand and split the route if needed"""
+    pass
 
-    
+def runSimulation():
+    """runs one iteration of the simulation - checks whether average duration is exceeded"""
