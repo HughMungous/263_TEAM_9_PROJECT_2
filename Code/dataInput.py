@@ -101,7 +101,7 @@ def readDataWithStats(fileAddress: str = 'Data/WoolworthsDemands.csv'):
     newDf["max"] = maxs.values
     newDf["mode"] = demands.values * 1.5 - mins.values * 0.25 - maxs.values * 0.25 
 
-    print(newDf[:5])
+    # print(newDf[:5])
     
     return newDf
 
