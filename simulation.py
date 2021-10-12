@@ -60,9 +60,18 @@ def checkRoute(demands, routes):
         else: # adding on the remaining portion of the route 
             if route[j:i]:
                 tempRoutes.append([depot]+route[j:i])
-                
+
         newRoutes.extend(tempRoutes)
     return newRoutes
 
 def runSimulation():
     """runs one iteration of the simulation - checks whether average duration is exceeded"""
+    pass
+
+def calculateDuration(demands, route, multiplier):
+    ans = 0
+    for i in range(len(route)-1):
+        ans += travelDurations[route[i]][route[i+1]]*multiplier
+        ans += 0.125*demands[route[i+1]]
+    return ans + travelDurations[route[-1]][depot]
+
