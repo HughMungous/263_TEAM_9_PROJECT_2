@@ -40,9 +40,29 @@ def simulateDurations():
     pass
 
 
-def checkRoute():
-    """needs to check demand and split the route if needed"""
-    pass
+def checkRoute(demands, routes):
+    """needs to check demand and split the route if needed
+    
+    """
+    #TODO: fix the depot variable
+    depot = "dist..."
+    newRoutes = []
+    # going through each route and checking the demand
+    for route in routes: 
+        # cDemand stores the demand of the current "subroute", j the start of the subroute
+        cDemand, j = 0, 1 
+        tempRoutes = []
+        for i in range(len(route[1:])):
+            cDemand += demands[route[i]]
+            if cDemand > 26:    # we split the route and start a new subroute
+                tempRoutes.append([depot]+route[j:i])
+                cDemand, j = demands[route[i]], i
+        else: # adding on the remaining portion of the route 
+            if route[j:i]:
+                tempRoutes.append([depot]+route[j:i])
+                
+        newRoutes.extend(tempRoutes)
+    return newRoutes
 
 def runSimulation():
     """runs one iteration of the simulation - checks whether average duration is exceeded"""
