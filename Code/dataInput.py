@@ -92,16 +92,16 @@ def readDataWithStats(fileAddress: str = 'Data/WoolworthsDemands.csv'):
     maxs    = df.loc[:,validDays].max(axis=1)
     # print(maxs[:5])
     
-    newDf = pd.DataFrame(columns=["Store", "Demand", "min", "max", "median"])
+    newDf = pd.DataFrame(columns=["Store", "Demand", "min", "max", "mode"])
     newDf["Store"] = df.index
     newDf.set_index("Store")
 
     newDf["Demand"] = demands.values
     newDf["min"] = mins.values
-    newDf["median"] = medians.values
     newDf["max"] = maxs.values
+    newDf["mode"] = demands.values * 1.5 - mins.values * 0.25 - maxs.values * 0.25 
 
-    # print(newDf[:5])
+    print(newDf[:5])
     
     return newDf
 
