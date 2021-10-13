@@ -11,21 +11,27 @@ from numpy.random import seed
 from matplotlib import pyplot as plt
 
 affirm = lambda x: x in "yY"
+cost = lambda x: 225*x + 50*max(0,x-4)
 
 depot = "Distribution Centre Auckland"
 depotSet = set([depot])
 
 travelDurations = dataInput.readTravelDurations()
-averageDemands = dataInput.readDataWithStats()
-routes = dataInput.readRoutes("nonPartitionedSolutions/WeekdayAvg.json")
-temp = []
-for region in routes:
-    temp.extend(routes[region])
-routes = temp[:]
 
-def checkSolutionIsPartition(routes):
+weekdayDemands = dataInput.readDataWithStats()
+saturdayDemands = dataInput.readSaturdayWithStats()
+
+weekdayRoutes = dataInput.readRoutes("nonPartitionedSolutions/WeekdayAvg.json")
+saturdayRoutes = dataInput.readRoutes("nonPartitionedSolutions/Saturday.json")
+
+t1, t2 = [], []
+for region in weekdayRoutes:
+    t1.extend(weekdayRoutes[region])
+    t2.extend(saturdayRoutes[region])
+weekdayRoutes, saturdayRoutes = t1, t2
+
+def checkSolutionIsPartition(routes, day = "WeekDayAvg"):
     """Function to check whether solution visits everystore"""
-
     res = True
     
     rSet = set()
@@ -37,31 +43,49 @@ def checkSolutionIsPartition(routes):
             res = False
         rSet |= tempSet
 
-    if rSet != set([loc for loc in averageDemands.index]) ^ depotSet:            
-        print("Solution misses certain stores")
-        print(f"Missing stores: {set(averageDemands.index) ^ rSet ^ depotSet}")
-        res = False
+    if day == "WeekdayAvg":
+        if rSet != set([loc for loc in weekdayDemands.index]) ^ depotSet:            
+            print("Solution misses certain stores")
+            print(f"Missing stores: {set(weekdayDemands.index) ^ rSet ^ depotSet}")
+            res = False
+    else:
+        if rSet != set([loc for loc in saturdayDemands.index]) ^ depotSet:            
+            print("Solution misses certain stores")
+            print(f"Missing stores: {set(saturdayDemands.index) ^ rSet ^ depotSet}")
+            res = False
 
     return res
 
 
-def sampleDurations(mean: float, std: float):
+def sampleDemandsWeekday(mean: float, std: float):
     # returns 1000 samples from a normal distribution 
     
     taskTime = stats.norm.rvs(loc=mean, scale=std, size=1000)
-    
     return taskTime
 
-def generateDemands():
-    simDemands = {shop: [] for shop in averageDemands.index}
+def sampleDemandsSaturday(minx: float, maxx: float):
+    # returns 1000 samples from a normal distribution 
     
-    for shop in averageDemands.index:
-        simDemands[shop] = sampleDurations(*list(averageDemands.loc[shop,["Demand", "std"]]))
+    taskTime = stats.uniform.rvs(loc=minx, scale=maxx-minx, size=1000)
+    return taskTime
+
+def generateDemandsWeekday():
+    simDemands = {shop: [] for shop in weekdayDemands.index}
+    
+    for shop in weekdayDemands.index:
+        simDemands[shop] = sampleDemandsWeekday(*list(weekdayDemands.loc[shop,["Demand", "std"]]))
         
     return simDemands
 
+def generateDemandsSaturday():
+    simDemands = {shop: [] for shop in saturdayDemands.index}
+    
+    for shop in saturdayDemands.index:
+        simDemands[shop] = sampleDemandsSaturday(*list(saturdayDemands.loc[shop,["min", "max"]]))
+        
+    return simDemands
 
-def checkRoute(demands):
+def checkRoute(demands, routes):
     """needs to check demand and split the route if needed
     
     """
@@ -93,53 +117,154 @@ def calculateDuration(demands, route, multiplier = 1):
         ans += 0.125*demands[route[i+1]]
     return ans + travelDurations[route[-1]][depot]*multiplier
 
-if __name__=="__main__":
-    seed(508)
-    # if affirm(input("Specify a seed? [Y/N]: ")):
-        # seed(int(input("Please enter a seed: ")))
+def simulateWeekdays(scale = 0.1):
+    demands = pd.DataFrame.from_dict(generateDemandsWeekday(), orient='index')
+    morningResults = []
+    morningLens, morningDurations = [], []
+    # rRoutes = []
 
-    cost = lambda x: 225*x + 50*max(0,x-4)
-    
-    demands = pd.DataFrame.from_dict(generateDemands(), orient='index')
-    results = []
-    lens, durations, rRoutes = [], [], []
-    
+    print("Running weekday 8-12")
     for i in range(1000):
-        multiplier = stats.norm.rvs(loc=1.564,scale=0.10)
+        multiplier = stats.norm.rvs(loc=1.399,scale=scale)
         curCost = 0
         curDur = 0
 
-        tempRoutes = checkRoute(demands.loc[:,i])
+        tempRoutes = checkRoute(demands.loc[:,i], routes=weekdayRoutes)
 
-        lens.append(len(tempRoutes))
+        morningLens.append(len(tempRoutes))
         # rRoutes.append(tempRoutes)
+       
         for route in tempRoutes:
             tempDuration = calculateDuration(demands.loc[:,i], route, multiplier=multiplier)
             curDur += tempDuration
             curCost += cost(tempDuration)
 
-        assert(checkSolutionIsPartition(tempRoutes))
-        results.append(curCost)
-        durations.append(curDur/lens[-1])
-    # dataInput.storeRoutes(results, 'Simulations/noDurationVariation.json')
-    # rRoutes = [x for _,x in sorted(zip(results,rRoutes))]
-    # print(f"Lower interval: {results[25]}, upper interval: {results[974]}")
-    # dataInput.storeRoutes({"lower": rRoutes[25], "upper": rRoutes[975]}, "Simulations/confintRoutes.json")
-    results.sort()
-    durations.sort()
-    # plt.show()
-    # print(durations)
+        # assert(checkSolutionIsPartition(tempRoutes))
+        morningResults.append(curCost)
+        morningDurations.append(curDur/morningLens[-1])
+
+    eveningResults = []
+    eveningLens, eveningDurations = [], []
+
+
+    print("Running weekday 2-6")
+    for i in range(1000):
+        multiplier = stats.norm.rvs(loc=1.564,scale=scale)
+        curCost = 0
+        curDur = 0
+
+        tempRoutes = checkRoute(demands.loc[:,i], routes=weekdayRoutes)
+
+        eveningLens.append(len(tempRoutes))
+       
+        for route in tempRoutes:
+            tempDuration = calculateDuration(demands.loc[:,i], route, multiplier=multiplier)
+            curDur += tempDuration
+            curCost += cost(tempDuration)
+
+        # assert(checkSolutionIsPartition(tempRoutes))
+        eveningResults.append(curCost)
+        eveningDurations.append(curDur/eveningLens[-1])
+
+    return morningResults, eveningResults, (morningDurations, eveningDurations)
+
+def simulateSaturday(scale = 0.1):
+    demands = pd.DataFrame.from_dict(generateDemandsSaturday(), orient='index')
+    morningResults = []
+    morningLens, morningDurations = [], []
+    # rRoutes = []
+
+    print("Running Saturday 8-12")
+    for i in range(1000):
+        multiplier = stats.norm.rvs(loc=1.208,scale=scale)
+        curCost = 0
+        curDur = 0
+
+        tempRoutes = checkRoute(demands.loc[:,i], routes=saturdayRoutes)
+
+        morningLens.append(len(tempRoutes))
+        # rRoutes.append(tempRoutes)
+       
+        for route in tempRoutes:
+            tempDuration = calculateDuration(demands.loc[:,i], route, multiplier=multiplier)
+            curDur += tempDuration
+            curCost += cost(tempDuration)
+
+        # assert(checkSolutionIsPartition(tempRoutes), day="yes")
+        morningResults.append(curCost)
+        morningDurations.append(curDur/morningLens[-1])
+
+    eveningResults = []
+    eveningLens, eveningDurations = [], []
+
+    print("Running Saturday 2-6")
+    for i in range(1000):
+        multiplier = stats.norm.rvs(loc=1.204,scale=scale)
+        curCost = 0
+        curDur = 0
+
+        tempRoutes = checkRoute(demands.loc[:,i], routes=saturdayRoutes)
+
+        eveningLens.append(len(tempRoutes))
+       
+        for route in tempRoutes:
+            tempDuration = calculateDuration(demands.loc[:,i], route, multiplier=multiplier)
+            curDur += tempDuration
+            curCost += cost(tempDuration)
+
+        # assert(checkSolutionIsPartition(tempRoutes), day="yes")
+        eveningResults.append(curCost)
+        eveningDurations.append(curDur/eveningLens[-1])
+
+    return morningResults, eveningResults, (morningDurations, eveningDurations)
+
+if __name__=="__main__":
+    seed(508)
+    # if affirm(input("Specify a seed? [Y/N]: ")):
+        # seed(int(input("Please enter a seed: ")))
+
+    weekdayMorn, weekdayEve, _ = simulateWeekdays()
     
-    pltCosts = True
-    if pltCosts:
-        plt.hist(results, density = True, histtype="stepfilled", alpha=0.2)
-        plt.title("Histogram of costs in $ ...")
-        print(f"Mean cost: {sum(results)/1000:.3f}, Lower CI: {results[25]:.3f}, Upper CI: {results[975]:.3f}")
+    weekdayMorn.sort()
+    weekdayEve.sort()
+    
+    pltWMorn = True
+    if pltWMorn:
+        plt.hist(weekdayMorn, density = False, histtype="stepfilled", alpha=0.2)
+        plt.title("Distribution of Costs (Total) for Woolworths Weekday Inventory Routing during Morning Session (n = 1000)")
+        plt.ylabel("Frequency")
+        plt.xlabel("Cost, NZD")
+        print(f"Mean cost: {sum(weekdayMorn)/1000:.3f}, Lower CI: {weekdayMorn[25]:.3f}, Upper CI: {weekdayMorn[975]:.3f}")
         plt.show()
 
-    pltDurations = True
-    if pltDurations:
-        plt.hist(durations, density=True, histtype='stepfilled', alpha=0.2)
-        plt.title("Histogram of average durations")
-        print(f"Mean duration: {sum(durations)/1000}, Lower CI: {durations[25]}, Upper CI: {durations[975]}")
+    pltWEve = True
+    if pltWEve:
+        plt.hist(weekdayEve, density = False, histtype="stepfilled", alpha=0.2)
+        plt.title("Distribution of Costs (Total) for Woolworths Weekday Inventory Routing during Afternoon Session (n = 1000)")
+        plt.ylabel("Frequency")
+        plt.xlabel("Cost, NZD")
+        print(f"Mean cost: {sum(weekdayEve)/1000:.3f}, Lower CI: {weekdayEve[25]:.3f}, Upper CI: {weekdayEve[975]:.3f}")
+        plt.show()
+
+    saturdayMorn, saturdayEve, _ = simulateSaturday()
+    
+    saturdayMorn.sort()
+    saturdayEve.sort()
+    
+    pltSMorn = True
+    if pltSMorn:
+        plt.hist(saturdayMorn, density = False, histtype="stepfilled", alpha=0.2)
+        plt.title("Distribution of Costs (Total) for Woolworths Saturday Inventory Routing during Morning Session (n = 1000)")
+        plt.ylabel("Frequency")
+        plt.xlabel("Cost, NZD")
+        print(f"Mean cost: {sum(saturdayMorn)/1000:.3f}, Lower CI: {saturdayMorn[25]:.3f}, Upper CI: {saturdayMorn[975]:.3f}")
+        plt.show()
+
+    pltWEve = True
+    if pltWEve:
+        plt.hist(saturdayEve, density = False, histtype="stepfilled", alpha=0.2)
+        plt.title("Distribution of Costs (Total) for Woolworths Saturday Inventory Routing during Afternoon Session (n = 1000)")
+        plt.ylabel("Frequency")
+        plt.xlabel("Cost, NZD")
+        print(f"Mean cost: {sum(saturdayEve)/1000:.3f}, Lower CI: {saturdayEve[25]:.3f}, Upper CI: {saturdayEve[975]:.3f}")
         plt.show()
