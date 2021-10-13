@@ -5,7 +5,12 @@ from Code import dataInput
 
 import pandas as pd
 from scipy import stats
+from numpy.random import seed
+
+# plotting
 from matplotlib import pyplot as plt
+
+affirm = lambda x: x in "yY"
 
 depot = "Distribution Centre Auckland"
 depotSet = set([depot])
@@ -39,42 +44,21 @@ def checkSolutionIsPartition(routes):
 
     return res
 
-def alphaBetaFromAmB(a, m, b):
-    # Taken from code by David L. Mueller
-    #github dlmueller/PERT-Beta-Python
-    first_numer_alpha = 2.0 * (b + 4 * m - 5 * a)
-    first_numer_beta = 2.0 * (5 * b - 4 * m - a)
-    first_denom = 3.0 * (b - a)
-    second_numer = (m - a) * (b - m)
-    second_denom = (b - a) ** 2
-    second = (1 + 4 * (second_numer / second_denom))
-    alpha = (first_numer_alpha / first_denom) * second
-    beta = (first_numer_beta / first_denom) * second
-    return alpha, beta
 
-def generateTaskTime(a, m, b):
-    # Taken from code by Kevin Jia
-    # github??? 
-    alpha, beta = alphaBetaFromAmB(a, m, b)
-    location = a
-    scale = b - a
+def sampleDurations(mean: float, std: float):
+    # returns 1000 samples from a normal distribution 
     
-    taskTime = stats.beta.rvs(alpha, beta, size=1000) * scale + location
+    taskTime = stats.norm.rvs(loc=mean, scale=std, size=1000)
     
     return taskTime
 
 def generateDemands():
     simDemands = {shop: [] for shop in averageDemands.index}
     
-    
     for shop in averageDemands.index:
-        simDemands[shop]= generateTaskTime(*list(averageDemands.loc[shop,["min","mode","max"]]))
+        simDemands[shop] = sampleDurations(*list(averageDemands.loc[shop,["Demand", "std"]]))
         
     return simDemands
-    
-
-def simulateDurations():
-    pass
 
 
 def checkRoute(demands):
@@ -101,9 +85,6 @@ def checkRoute(demands):
         newRoutes.extend(tempRoutes)
     return newRoutes
 
-def runSimulation():
-    """runs one iteration of the simulation - checks whether average duration is exceeded"""
-    pass
 
 def calculateDuration(demands, route, multiplier = 1):
     ans = 0
@@ -113,27 +94,52 @@ def calculateDuration(demands, route, multiplier = 1):
     return ans + travelDurations[route[-1]][depot]*multiplier
 
 if __name__=="__main__":
+    seed(508)
+    # if affirm(input("Specify a seed? [Y/N]: ")):
+        # seed(int(input("Please enter a seed: ")))
+
     cost = lambda x: 225*x + 50*max(0,x-4)
     
     demands = pd.DataFrame.from_dict(generateDemands(), orient='index')
     results = []
-    lens = []
-    rRoutes = []
+    lens, durations, rRoutes = [], [], []
+    
     for i in range(1000):
+        multiplier = stats.norm.rvs(loc=1.564,scale=0.10)
         curCost = 0
-        tempRoutes = checkRoute(demands.loc[:,i])
-        # lens.append(len(tempRoutes))
-        rRoutes.append(tempRoutes)
+        curDur = 0
 
+        tempRoutes = checkRoute(demands.loc[:,i])
+
+        lens.append(len(tempRoutes))
+        # rRoutes.append(tempRoutes)
         for route in tempRoutes:
-            tempDuration = calculateDuration(demands.loc[:,i], route)
+            tempDuration = calculateDuration(demands.loc[:,i], route, multiplier=multiplier)
+            curDur += tempDuration
             curCost += cost(tempDuration)
 
         assert(checkSolutionIsPartition(tempRoutes))
         results.append(curCost)
+        durations.append(curDur/lens[-1])
     # dataInput.storeRoutes(results, 'Simulations/noDurationVariation.json')
-    rRoutes = [x for _,x in sorted(zip(results,rRoutes))]
-    print(f"Lower interval: {results[25]}, upper interval: {results[974]}")
-    dataInput.storeRoutes({"lower": rRoutes[25], "upper": rRoutes[975]}, "Simulations/confintRoutes.json")
-    # plt.hist(lens, density=True, histtype='stepfilled', alpha=0.2)
+    # rRoutes = [x for _,x in sorted(zip(results,rRoutes))]
+    # print(f"Lower interval: {results[25]}, upper interval: {results[974]}")
+    # dataInput.storeRoutes({"lower": rRoutes[25], "upper": rRoutes[975]}, "Simulations/confintRoutes.json")
+    results.sort()
+    durations.sort()
     # plt.show()
+    # print(durations)
+    
+    pltCosts = True
+    if pltCosts:
+        plt.hist(results, density = True, histtype="stepfilled", alpha=0.2)
+        plt.title("Histogram of costs in $ ...")
+        print(f"Mean cost: {sum(results)/1000:.3f}, Lower CI: {results[25]:.3f}, Upper CI: {results[975]:.3f}")
+        plt.show()
+
+    pltDurations = True
+    if pltDurations:
+        plt.hist(durations, density=True, histtype='stepfilled', alpha=0.2)
+        plt.title("Histogram of average durations")
+        print(f"Mean duration: {sum(durations)/1000}, Lower CI: {durations[25]}, Upper CI: {durations[975]}")
+        plt.show()
