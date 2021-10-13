@@ -110,7 +110,7 @@ def calculateDuration(demands, route, multiplier = 1):
     for i in range(len(route)-1):
         ans += travelDurations[route[i]][route[i+1]]*multiplier
         ans += 0.125*demands[route[i+1]]
-    return ans + travelDurations[route[-1]][depot]
+    return ans + travelDurations[route[-1]][depot]*multiplier
 
 if __name__=="__main__":
     cost = lambda x: 225*x + 50*max(0,x-4)
@@ -124,9 +124,11 @@ if __name__=="__main__":
         tempRoutes = checkRoute(demands.loc[:,i])
         # lens.append(len(tempRoutes))
         rRoutes.append(tempRoutes)
+
         for route in tempRoutes:
             tempDuration = calculateDuration(demands.loc[:,i], route)
             curCost += cost(tempDuration)
+
         assert(checkSolutionIsPartition(tempRoutes))
         results.append(curCost)
     # dataInput.storeRoutes(results, 'Simulations/noDurationVariation.json')
