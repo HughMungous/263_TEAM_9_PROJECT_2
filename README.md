@@ -30,6 +30,6 @@ Note that above installation of requirements.txt file is **not mandatory**. If y
 
 **Optimal Routing plan (Weekday and Saturday, respectively):**
 <p float="left">
-  <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/WeekdayOptimalRoute.png?raw=true" width =450>
-  <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/SaturdayOptimalRoute.png?raw=true" width=448>
+  <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/WeekdayOptimalRoute.png?raw=true" width =350>
+  <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/SaturdayOptimalRoute.png?raw=true" width=348>
 </p>
