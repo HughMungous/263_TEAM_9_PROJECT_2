@@ -1,7 +1,7 @@
 # ENGSCI 263: Operations Research Project by Team 9
 **Team members: Hugh Parsons, Emily Hacket Pain, Jacky Jin, Nicholas Lee**
 
-This project objective is to find optimal routing plan to satisfy all Woolworth store demands in Auckland, analyse the effect of uncertainty around the demand and traffic conditions, and finally analyse the effect of closing nearby Woolworths store that are potentially redundant.
+The project objective is to find optimal routing plan to satisfy all Woolworth store demands in Auckland, analyse the effect of uncertainty around the demand and traffic conditions, and finally analyse the effect of closing nearby Woolworths store that are potentially redundant.
 
 <p float="left">
   <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/StoreLocations.PNG" width = 213>
