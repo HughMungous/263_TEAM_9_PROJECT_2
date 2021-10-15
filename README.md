@@ -25,6 +25,8 @@ Note that above installation of requirements.txt file is **not mandatory**. If y
 
 - ***mapping.ipynb*** - Jupyter notebook for route visualisation. 
 - ***test.py*** - Testing suite to validate the solution outputs. 
+- ***Data*** - Folder for given data in csv format. 
+- ***Simulations*** - costs and 95% percentile interval of simulation results. 
 
 ## Results
 
