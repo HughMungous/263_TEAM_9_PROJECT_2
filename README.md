@@ -4,9 +4,9 @@
 The project objective is to find optimal routing plan to satisfy all Woolworth store demands in Auckland, analyse the effect of uncertainty around the demand and traffic conditions, and finally analyse the effect of closing nearby Woolworths store that are potentially redundant.
 
 <p float="left">
-  <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/StoreLocations.PNG" width = 213>
-  <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/CostUncertainty.png" width=270>
-  <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/ShopClosureJustification.png" width=200>
+  <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/Visualisation/StoreLocations.png" width = 213>
+  <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/Visualisation/CostUncertainty.png" width=270>
+  <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/Visualisation/ShopClosureJustification.png" width=200>
 </p>
 
 This repository stores all the relevant files for our project.:smiley:
@@ -30,6 +30,6 @@ Note that above installation of requirements.txt file is **not mandatory**. If y
 
 **Optimal Routing plan (Weekday and Saturday, respectively):**
 <p float="left">
-  <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/WeekdayOptimalRoute.png?raw=true" width =350>
-  <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/SaturdayOptimalRoute.png?raw=true" width=348>
+  <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/Visualisation/WeekdayOptimalRoute.png?raw=true" width =350>
+  <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/Visualisation/SaturdayOptimalRoute.png?raw=true" width=348>
 </p>
