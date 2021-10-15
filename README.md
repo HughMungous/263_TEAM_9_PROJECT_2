@@ -9,7 +9,7 @@ The project objective is to find optimal routing plan to satisfy all Woolworth s
   <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/Visualisation/ShopClosureJustification.png" width=200>
 </p>
 
-This repository stores all the relevant files for our project.:smiley:
+This repository stores all the relevant files for our project.
 
 ## Installation 
 
