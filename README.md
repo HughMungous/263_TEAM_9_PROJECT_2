@@ -27,6 +27,9 @@ Note that above installation of requirements.txt file is **not mandatory**. If y
 - ***test.py*** - Testing suite to validate the solution outputs. 
 - ***Data*** - Folder for given data in csv format. 
 - ***Simulations*** - costs and 95% percentile interval of simulation results. 
+- ***routing.py*** - generate set of feasible routes that LP can run.
+- ***dataInput.py*** - reads data and outputs data in format specifically compatible to input format of our functions. 
+- ***linearProgram.py*** - mixed-integer linear program which inputs set of feasbile routes to output lowest-cost route for a region. 
 
 ## Results
 
