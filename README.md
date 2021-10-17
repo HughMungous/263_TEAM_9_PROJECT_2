@@ -1,7 +1,7 @@
 # ENGSCI 263: Operations Research Project by Team 9
 **Team members: Hugh Parsons, Emily Hacket Pain, Jacky Jin, Nicholas Lee**
 
-The project objective is to find optimal routing plan to satisfy all Woolworth store demands in Auckland, analyse the effect of uncertainty around the demand and traffic conditions, and finally analyse the effect of closing nearby Woolworths store that are potentially redundant.
+The project objective is to find optimal routing plan to satisfy all Woolworth supermarket demands in Auckland, analyse the effect of uncertainty around the demand for pallets and traffic conditions, and finally analyse the effect of closing Woolworths supermarkets that are potentially redundant due to close proximity.
 
 <p float="left">
   <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/Visualisation/StoreLocations.png" width = 213>
@@ -27,6 +27,10 @@ Note that above installation of requirements.txt file is **not mandatory**. If y
 - ***test.py*** - Testing suite to validate the solution outputs. 
 - ***Data*** - Folder for given data in csv format. 
 - ***Simulations*** - costs and 95% percentile interval of simulation results. 
+- ***routing.py*** - generate set of feasible routes that LP can run.
+- ***dataInput.py*** - reads data and outputs data in format specifically compatible to input format of our functions. 
+- ***linearProgram.py*** - mixed-integer linear program which inputs set of feasbile routes to output lowest-cost route for a region. 
+- ***linearProgram.py*** - mixed-integer linear program which inputs set of feasbile routes to output lowest-cost route for a region.
 
 ## Results
 
