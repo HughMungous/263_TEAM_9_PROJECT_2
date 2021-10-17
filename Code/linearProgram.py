@@ -35,12 +35,10 @@ def findBestPartition(day: str, region: str, routes: List[List[str]], stores: Li
     routing_model.solve(PULP_CBC_CMD(msg=disp))
 
     routesChosen = []
-    if disp: 
-        print("The choosen routes are out of a total of %s:" % len(possibleRoutes))
+    
     for i in range(len(routes)):
         if possibleRoutes[i].value() == 1.0:
-            if disp:
-                print(routes[i])
+            
             routesChosen.append(routes[i])
 
     return routesChosen, LpStatus[routing_model.status] == "Optimal"

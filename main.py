@@ -69,7 +69,7 @@ def eliminatePoorRoutes(routes, demands, minLenToKeep: int = 2, maxDuration: flo
 
 def findInitalSolution(day: str, demands: Dict[str, float], locations: Dict[str,List[str]], 
                        centroid_mean_ratio: float, max_stores: int, traffic_multiplier: float,
-                       min_route_length: int, max_duration: float):
+                       min_route_length: int, max_duration: float, lpDisplay: bool):
     """Finds the solutions for a given day..."""
     
     # demands = dataInput.readAverageDemands(roundUp=True)
@@ -87,7 +87,7 @@ def findInitalSolution(day: str, demands: Dict[str, float], locations: Dict[str,
         stores = regionalDemands.keys()
         durations = [calculateDuration(route, regionalDemands, multiplier=traffic_multiplier) for route in routes]
 
-        regionalSolution, problemStatus = linearProgram.findBestPartition(day, region, routes, stores, durations)
+        regionalSolution, problemStatus = linearProgram.findBestPartition(day, region, routes, stores, durations, disp=lpDisplay)
         
         solution[region] = regionalSolution
         solutionStatus = solutionStatus and problemStatus
@@ -208,7 +208,8 @@ def initialOptimisation(days: List[str] = ["WeekdayAvg", "Saturday"]):
                                             max_stores=localSettings["max_stores"][day], 
                                             traffic_multiplier=localSettings["traffic_multiplier"], 
                                             min_route_length=localSettings["min_route_length"], 
-                                            max_duration=localSettings["max_duration"])
+                                            max_duration=localSettings["max_duration"],
+                                            lpDisplay=localSettings["display_lp_output"])
         
         if not solStatus:
             raise LP_NOT_OPTIMAL(f"\033[93mThe solution for {day} was not optimal\033[0m")
@@ -271,7 +272,8 @@ def simulateStoreClosures(days: List[str] = ["WeekdayAvg", "Saturday"]):
                                             max_stores=localSettings["max_stores"][day], 
                                             traffic_multiplier=localSettings["traffic_multiplier"], 
                                             min_route_length=localSettings["min_route_length"], 
-                                            max_duration=localSettings["max_duration"])
+                                            max_duration=localSettings["max_duration"],
+                                            lpDisplay=localSettings["display_lp_output"])
         
         if not solStatus:
             raise LP_NOT_OPTIMAL(f"\033[93mThe solution for {day} was not optimal\033[0m")
@@ -287,15 +289,35 @@ def simulateStoreClosures(days: List[str] = ["WeekdayAvg", "Saturday"]):
 
 def main():
     np.random.seed(508)
-    
+    # yes this could be a for loop...
+
     # initial solutions
     if settings["inital_solution"]["run"]:
+        msg = "Running Initial Solution:"
+        print(f"\n\t{msg}\n\t{'_'*len(msg)}\n")
+        
         initialResults = initialOptimisation()
         
         if settings["inital_solution"]["save"]:
             dataInput.storeRoutes(initialResults, fileAddress="Solutions/initialRoutes.json")      
     else:
         initialResults = dataInput.readRoutes("Solutions/initialRoutes.json")
+
+    if settings["inital_solution"]["plot"]:
+        msg = "Displaying Initial Results:"
+        print(f"\n\t{msg}\n\t{'_'*len(msg)}\n")
+
+        demands = dataInput.readAverageDemands(roundUp=settings["inital_solution"]["run_args"]["round_up"])
+
+        for day in initialResults.keys():
+            print(f"\n\t\t{day}:\n\t\t{'-'*(len(day)+1)}\n")
+
+            durations = [calculateDuration(route, demands[day], settings["inital_solution"]["run_args"]["traffic_multiplier"]) for route in initialResults[day]]
+            costs = [cost(dur) for dur in durations]
+
+            print(f"Total Cost:\t\t{sum(costs):.3f}")
+            print(f"Average Duration:\t{sum(durations)/len(durations):.3f}")
+            print(f"Number of Trucks:\t{len(durations)}\n")
 
     # uncertainty simulations
     if settings["uncertainty_simulation"]["run"]:
@@ -306,6 +328,39 @@ def main():
     else:
         simulationResults = dataInput.readRoutes("Solutions/simulationResults.json")
 
+    if settings["uncertainty_simulation"]["plot"]:
+        msg = "Displaying Simulation Results:"
+        print(f"\n\t{msg}\n\t{'_'*len(msg)}\n")
+
+        demands = dataInput.readAverageDemands(roundUp=settings["uncertainty_simulation"]["run_args"]["round_up"])
+
+        for day in simulationResults.keys():
+            print(f"\n\t\t{day}:\n\t\t{'-'*(len(day)+1)}\n")
+
+            multipliers = settings["uncertainty_simulation"]["run_args"]["traffic_multipliers"][day]
+            # maybe not the right term?
+            for period in simulationResults[day]:
+                print(f"\n{period}:\n{'-'*(len(period)+1)}\n")
+                period_multiplier = multipliers[0] if period == "morning" else multipliers[1]
+
+                for measure in simulationResults[day][period]["routes"]:
+                    print(f"\n{measure}:\n")
+                    durations = [calculateDuration(route, demands[day], period_multiplier) for route in simulationResults[day][period]["routes"][measure]]
+                    costs = [cost(dur) for dur in durations]
+
+                    print(f"Total Cost:\t\t{sum(costs):.3f}")
+                    print(f"Average Duration:\t{sum(durations)/len(durations):.3f}")
+                    print(f"Number of Trucks:\t{len(durations)}\n")
+
+                tempData = simulationResults[day][period]["statistics"]
+                msg = "Statistics:"
+                print(f"{msg}")
+
+                print(f"Average Cost:\t\t\t{np.mean(tempData['costs']):.3f}")
+                print(f"Average Duration:\t\t{np.mean(tempData['durations']):.3f}")
+                print(f"Average Number of Trucks:\t{np.mean(tempData['lengths'])}\n")
+
+
     # resolving with store closures
     if settings["store_closures"]["run"]:
         storeClosureResults = simulateStoreClosures()
@@ -313,14 +368,36 @@ def main():
         if settings["store_closures"]["save"]:
             dataInput.storeRoutes(storeClosureResults, fileAddress="Solutions/storeClosureSolutions.json") 
     else:
-        simulationResults = dataInput.readRoutes("Solutions/storeClosureSolutions.json")
+        storeClosureResults = dataInput.readRoutes("Solutions/storeClosureSolutions.json")
 
+    if settings["store_closures"]["plot"]:
+        msg = "Displaying Store Closure Results:"
+        print(f"\n\t{msg}\n\t{'_'*len(msg)}\n")
 
+        demands = dataInput.readDemandsWithStoreClosure(toClose=settings["store_closures"]["run_args"]["stores_to_close_and_keep"],
+                                                        transferRatio=settings["store_closures"]["run_args"]["transfer_ratio"],
+                                                        roundUp=settings["store_closures"]["run_args"]["round_up"])
+
+        for day in storeClosureResults.keys():
+            print(f"\n\t\t{day}:\n\t\t{'-'*(len(day)+1)}\n")
+
+            durations = [calculateDuration(route, demands[day], settings["store_closures"]["run_args"]["traffic_multiplier"]) for route in storeClosureResults[day]]
+            costs = [cost(dur) for dur in durations]
+
+            print(f"Total Cost:\t\t{sum(costs):.3f}")
+            print(f"Average Duration:\t{sum(durations)/len(durations):.3f}")
+            print(f"Number of Trucks:\t{len(durations)}\n")
     return
 
 
 
 if __name__ == "__main__":
+    # demands = dataInput.readAverageDemands()
+    # for route in routes:
+    #     duration = calculateDuration(route, demands)
+    #     tempcost = cost(duration)
+
+
     main()
     # data = dataInput.readRoutes("simulationResults.json")
     # routes = data["WeekdayAvg"]["morning"]["routes"]["lower"]
