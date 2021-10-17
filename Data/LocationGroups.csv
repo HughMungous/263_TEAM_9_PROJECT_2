@@ -1,40 +1,27 @@
-West,North,Central,South
-Countdown_Hobsonville,Countdown_Birkenhead,Countdown Airport,Countdown Manukau
-Countdown_Northwest,Countdown_Northcote,Countdown Auckland City,Countdown Manukau Mall
-Countdown_Westgate,Countdown_Glenfield,Countdown Aviemore Drive,Countdown Manurewa
-Countdown_Te_Atatu,Countdown_Takapuna,Countdown Blockhouse Bay,Countdown Papakura
-Countdown_Te_Atatu_South,Countdown_Hauraki_Corner,Countdown Botany Downs,Countdown Roselands
-Countdown_Lincoln_Road,Countdown_Milford,Countdown Greenlane,Countdown Takanini
-Countdown_Henderson,Countdown_Sunnynook,Countdown Grey Lynn,SuperValue Flatbush
-SuperValue_Palomino,Countdown_Mairangi_Bay,Countdown Grey Lynn Central,SuperValue Papakura
-FreshChoice_Ranui,Countdown_Browns_Bay,Countdown Highland Park,
-,,Countdown Howick,
-,,Countdown Kelston,
-,,Countdown Lynfield,
-,,Countdown Lynmall,
-,,Countdown Mangere East,
-,,Countdown Mangere Mall,
-,,Countdown Meadowbank,
-,,Countdown Meadowlands,
-,,Countdown Metro Albert Street,
-,,Countdown Metro Halsey Street,
-,,Countdown Mt Eden,
-,,Countdown Mt Roskill,
-,,Countdown Mt Wellington,
-,,Countdown Newmarket,
-,,Countdown Onehunga,
-,,Countdown Pakuranga,
-,,Countdown Papatoetoe,
-,,Countdown Ponsonby,
-,,Countdown Pt Chevalier,
-,,Countdown St Johns,
-,,Countdown St Lukes,
-,,Countdown Sylvia Park,
-,,Countdown Three Kings,
-,,Countdown Victoria Street West,
-,,FreshChoice Glen Eden,
-,,FreshChoice Half Moon Bay,
-,,FreshChoice Mangere Bridge,
-,,FreshChoice Otahuhu,
-,,SuperValue Avondale,
-,,SuperValue Titirangi,
+West,North,NorthCentral,SouthCentral,South
+Countdown_Hobsonville,Countdown_Birkenhead,Countdown Auckland City,Countdown Airport,Countdown Manukau
+Countdown_Northwest,Countdown_Northcote,Countdown Blockhouse Bay,Countdown Aviemore Drive,Countdown Manukau Mall
+Countdown_Westgate,Countdown_Glenfield,Countdown Greenlane,Countdown Botany Downs,Countdown Manurewa
+Countdown_Te_Atatu,Countdown_Takapuna,Countdown Grey Lynn,Countdown Highland Park,Countdown Papakura
+Countdown_Te_Atatu_South,Countdown_Hauraki_Corner,Countdown Grey Lynn Central,Countdown Howick,Countdown Roselands
+Countdown_Lincoln_Road,Countdown_Milford,Countdown Kelston,Countdown Mangere East,Countdown Takanini
+Countdown_Henderson,Countdown_Sunnynook,Countdown Lynfield,Countdown Mangere Mall,SuperValue Flatbush
+SuperValue_Palomino,Countdown_Mairangi_Bay,Countdown Lynmall,Countdown Meadowlands,SuperValue Papakura
+FreshChoice_Ranui,Countdown_Browns_Bay,Countdown Meadowbank,Countdown Pakuranga,
+,,Countdown Metro Albert Street,Countdown Papatoetoe,
+,,Countdown Metro Halsey Street,FreshChoice Half Moon Bay,
+,,Countdown Mt Eden,FreshChoice Mangere Bridge,
+,,Countdown Mt Roskill,FreshChoice Otahuhu,
+,,Countdown Mt Wellington,Countdown Onehunga,
+,,Countdown Newmarket,,
+,,Countdown Ponsonby,,
+,,Countdown Pt Chevalier,,
+,,Countdown St Johns,,
+,,Countdown St Lukes,,
+,,Countdown Sylvia Park,,
+,,Countdown Three Kings,,
+,,Countdown Victoria Street West,,
+,,FreshChoice Glen Eden,,
+,,SuperValue Avondale,,
+,,SuperValue Titirangi,,
+,,,,
