@@ -1,4 +1,7 @@
-"""script to contain data input"""
+"""
+Reads data and outputs data in format specifically compatible to input format of our functions
+
+"""
 
 # from glob import glob
 import datetime
@@ -10,7 +13,12 @@ from typing import Dict, List, Tuple
 
 
 def readLocationGroups(fileAddress: str = "./Data/LocationGroups.csv")->Dict[str, List[str]]:
-    """returns the stores in their location groups"""
+    """
+    Returns the stores in their location groups
+    
+    
+    
+    """
     
 
     locationGroupData = pd.read_csv(fileAddress, sep=',')
