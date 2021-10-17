@@ -9,3 +9,6 @@
 # compiled python
 *.pyc
 __pycache__/
+
+# Linear Program files
+LPFiles
