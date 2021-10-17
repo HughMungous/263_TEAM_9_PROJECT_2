@@ -12,7 +12,8 @@
             "centroid_mean_ratio": 1.0,
             "max_duration": 6.0, 
             "traffic_multiplier": 1.0,
-            "min_route_length": 3.0
+            "min_route_length": 3.0,
+            "display_lp_output": false
         },
         "plot_args": {
             
@@ -49,6 +50,7 @@
             "max_duration": 6.0,
             "traffic_multiplier": 1.0,
             "min_route_length": 3.0,
+            "display_lp_output": false,
             "transfer_ratio": 0.5,
             "stores_to_close_and_keep": [
                 ["Countdown Sylvia Park", "Countdown Mt Wellington"],

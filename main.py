@@ -69,7 +69,7 @@ def eliminatePoorRoutes(routes, demands, minLenToKeep: int = 2, maxDuration: flo
 
 def findInitalSolution(day: str, demands: Dict[str, float], locations: Dict[str,List[str]], 
                        centroid_mean_ratio: float, max_stores: int, traffic_multiplier: float,
-                       min_route_length: int, max_duration: float):
+                       min_route_length: int, max_duration: float, lpDisplay: bool):
     """Finds the solutions for a given day..."""
     
     # demands = dataInput.readAverageDemands(roundUp=True)
@@ -87,7 +87,7 @@ def findInitalSolution(day: str, demands: Dict[str, float], locations: Dict[str,
         stores = regionalDemands.keys()
         durations = [calculateDuration(route, regionalDemands, multiplier=traffic_multiplier) for route in routes]
 
-        regionalSolution, problemStatus = linearProgram.findBestPartition(day, region, routes, stores, durations)
+        regionalSolution, problemStatus = linearProgram.findBestPartition(day, region, routes, stores, durations, disp=lpDisplay)
         
         solution[region] = regionalSolution
         solutionStatus = solutionStatus and problemStatus
@@ -208,7 +208,8 @@ def initialOptimisation(days: List[str] = ["WeekdayAvg", "Saturday"]):
                                             max_stores=localSettings["max_stores"][day], 
                                             traffic_multiplier=localSettings["traffic_multiplier"], 
                                             min_route_length=localSettings["min_route_length"], 
-                                            max_duration=localSettings["max_duration"])
+                                            max_duration=localSettings["max_duration"],
+                                            lpDisplay=localSettings["display_lp_output"])
         
         if not solStatus:
             raise LP_NOT_OPTIMAL(f"\033[93mThe solution for {day} was not optimal\033[0m")
@@ -271,7 +272,8 @@ def simulateStoreClosures(days: List[str] = ["WeekdayAvg", "Saturday"]):
                                             max_stores=localSettings["max_stores"][day], 
                                             traffic_multiplier=localSettings["traffic_multiplier"], 
                                             min_route_length=localSettings["min_route_length"], 
-                                            max_duration=localSettings["max_duration"])
+                                            max_duration=localSettings["max_duration"],
+                                            lpDisplay=localSettings["display_lp_output"])
         
         if not solStatus:
             raise LP_NOT_OPTIMAL(f"\033[93mThe solution for {day} was not optimal\033[0m")
