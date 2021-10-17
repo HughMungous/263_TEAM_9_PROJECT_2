@@ -1,21 +1,7 @@
 '''
-Mixed-integer linear pogram which solves for the most optimal solution
-
-Parameters
----------
-
-
-Returns
--------
-routesChosen: np.array
-              Array of lowest-cost routes
-
-Notes
------
-This linear program uses the PuLP package in Python
+Mixed-integer linear pogram which solves for the most optimal solution of routes using PuLP
 
 '''
-
 
 import numpy as np
 import pandas as pd
@@ -24,8 +10,40 @@ from pulp import *
 from typing import List
 
 
-
 def findBestPartition(day: str, region: str, routes: List[List[str]], stores: List[str], durations: List[float], maxTrucks: int = 60, disp: bool = False):
+'''  
+Parameters
+---------
+day: str
+     Day of the week
+
+region: str
+        Region in Auckland of North, Central, West or South
+        
+routes: list of a list of strings
+        Multiple routes, each route is a list of strings
+
+stores: list of stings
+        Woolworth NZ operated supermarket stores in Auckland
+        
+durations: list of floats
+            Travel durations in seconds between each pair of stores and distribution points
+           
+maxTrucks: int
+           Number of trucks available which is 60
+
+Returns
+-------
+routesChosen: np.array
+              Array of lowest-cost routes
+
+Notes
+-----
+This linear program uses the PuLP package
+
+'''
+
+    # Variable of cost
     cost = lambda x: 225*x + 50 * max(0,x-4)
         
     # variable for whether a route is chosen 
@@ -37,13 +55,13 @@ def findBestPartition(day: str, region: str, routes: List[List[str]], stores: Li
     # Objective Function is added to 'routing_model'
     routing_model += pulp.lpSum([cost(durations[i]) * possibleRoutes[i] for i in range(len(routes))])
 
-    # specify the maximum number of tables
+    # specify the maximum number of trucks
     routing_model += (
         pulp.lpSum(possibleRoutes) <= maxTrucks,
         "Maximum_number_of_trucks",
     )
 
-    # A guest must seated at one and only one table
+    # A store must be only visited once
     for store in stores:
         routing_model += (
             # for each store, checks whether only one route satisfies it
