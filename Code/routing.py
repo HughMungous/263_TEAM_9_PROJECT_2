@@ -90,47 +90,47 @@ class Region:
         return sum([(self.locations['Lat'][store]-centroidLat)**2 + (self.locations['Long'][store]-centroidLong)**2])/len(stores)
 
 
-    def createPartitions(self, subGraphs: Dict[int, List[Any]], maxNumber: int, randomSeed: int = 100):
-        """Function to generate partitions of the region provided the valid subgraphs
+    # def createPartitions(self, subGraphs: Dict[int, List[Any]], maxNumber: int, randomSeed: int = 100):
+    #     """Function to generate partitions of the region provided the valid subgraphs
         
-        Parameters:
-            - havent decided on input typing yet
-        """
-        seed(randomSeed)
+    #     Parameters:
+    #         - havent decided on input typing yet
+    #     """
+    #     seed(randomSeed)
 
-        # creating sets
-        storesSet, numStores = set(self.nodes.keys()), len(self.nodes.keys())
+    #     # creating sets
+    #     storesSet, numStores = set(self.nodes.keys()), len(self.nodes.keys())
 
-        ans = []
-        while maxNumber:
-            # choosing a random subgraph of random length to start with
-            key = randint(1, len(subGraphs.keys()))
-            current = [subGraphs[key][randint(0,len(subGraphs[key])-1)]]
+    #     ans = []
+    #     while maxNumber:
+    #         # choosing a random subgraph of random length to start with
+    #         key = randint(1, len(subGraphs.keys()))
+    #         current = [subGraphs[key][randint(0,len(subGraphs[key])-1)]]
 
-            cSet = set(current[0]) # maintaining a set for set operations
+    #         cSet = set(current[0]) # maintaining a set for set operations
             
-            while storesSet - cSet: # while we have not found a partition
-                # Going from the largest subGraps to the smallest
+    #         while storesSet - cSet: # while we have not found a partition
+    #             # Going from the largest subGraps to the smallest
                 
-                for i in range(min(numStores-len(cSet), max(subGraphs.keys())), 0, -1):
-                    # randomly sorting the possible graphs
-                    # counter = 0
-                    # temp = sample(subGraphs[i], len(subGraphs[i]))
+    #             for i in range(min(numStores-len(cSet), max(subGraphs.keys())), 0, -1):
+    #                 # randomly sorting the possible graphs
+    #                 # counter = 0
+    #                 # temp = sample(subGraphs[i], len(subGraphs[i]))
                     
-                    for j in range(len(subGraphs[i])):
-                        if cSet.isdisjoint(set(subGraphs[i][j])):
-                            cSet |= set(subGraphs[i][j]) # updating the set
-                            current.append(subGraphs[i][j]) # updating the  current partition
-                            # if i > 2: 
-                            #     counter += 1
-                            #     if counter > 4:
-                            #         break
+    #                 for j in range(len(subGraphs[i])):
+    #                     if cSet.isdisjoint(set(subGraphs[i][j])):
+    #                         cSet |= set(subGraphs[i][j]) # updating the set
+    #                         current.append(subGraphs[i][j]) # updating the  current partition
+    #                         # if i > 2: 
+    #                         #     counter += 1
+    #                         #     if counter > 4:
+    #                         #         break
 
-            ans.append(current)
+    #         ans.append(current)
 
-            maxNumber-=1
+    #         maxNumber-=1
         
-        return ans
+    #     return ans
 
 @dataclass     
 class Pathfinder:
