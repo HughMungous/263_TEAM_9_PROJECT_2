@@ -81,7 +81,7 @@ def readTravelDurations(fileAddress: str = "./Data/WoolworthsTravelDurations.csv
     
     Returns
     -------
-    Adjacency matrix for the stores with the durations in hours
+    Dataframe: Adjacency matrix for the stores with the durations in hours
     
     """
     
@@ -99,7 +99,7 @@ def readStoreCoordinates(fileAddress: str = "./Data/WoolworthsLocations.csv")->p
                  
     Returns
     ------
-    
+    Dataframe: Latitude and longtitude of each Woolworth supermarket
     """
     
     return pd.read_csv(fileAddress, sep=",",usecols=['Store','Lat','Long']).set_index('Store')
@@ -110,11 +110,11 @@ def storeRoutes(partitions, fileAddress='Data/newRoutes.json'):
 
     Parameters:
     ----------
-        partitions: Dict[str, List[List[Tuple(List[str],float)]]]
-            The partitions for each region
+     partitions: Dict[str, List[List[Tuple(List[str],float)]]]
+                 The partitions for each region
         
-        fileAddress: str
-            name of the file to store the data in, should be a json
+     fileAddress: str
+                  name of the file to store the data in, should be a json
     """
     fp = open(fileAddress, mode='w')
 
@@ -128,8 +128,13 @@ def readRoutes(fileAddress='Data/newRoutes.json'):
 
     Parameters:
     ----------
-        fileAddress: str
-            ...
+    fileAddress: str
+    
+    Returns
+    -------
+    temp: JSON
+          Contains routes
+    
     """
     fp = open(fileAddress, mode='r')
 
@@ -138,6 +143,19 @@ def readRoutes(fileAddress='Data/newRoutes.json'):
     return temp
 
 def readDataWithStats(fileAddress: str = 'Data/WoolworthsDemands.csv', roundUp: bool = False):
+    '''
+    
+    Parameters
+    ----------
+    fileAddress: str
+                Pallet demands for each supermarket for a four-week period
+    
+    Returns
+    -------
+    newDf: DataFrame
+    
+    '''
+    
     df = pd.read_csv(fileAddress).set_index('Store')
     df.columns = pd.to_datetime(df.columns)
     
@@ -168,6 +186,19 @@ def readDataWithStats(fileAddress: str = 'Data/WoolworthsDemands.csv', roundUp: 
 
 
 def readSaturdayWithStats(fileAddress: str = "Data/WoolworthsDemands.csv", roundUp: bool = False):
+    '''
+    
+    Parameters
+    ----------
+    fileAddress: str
+                 Pallet demands for each supermarket for a four-week period
+    
+    Returns
+    -------
+    newDf: DataFrame
+    
+    '''
+    
     df = pd.read_csv(fileAddress).set_index('Store')
     df.columns = pd.to_datetime(df.columns)
     
