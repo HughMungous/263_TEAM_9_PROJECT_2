@@ -24,7 +24,7 @@ def readLocationGroups(fileAddress: str = "./Data/LocationGroups.csv")->Dict[str
         
     return res
 
-def readAverageDemands(fileAddress: str = "./Data/AverageDemands.csv", roundUp: bool = False)->Tuple[List[str], Dict[str, Dict[str, int]]]:
+def readAverageDemands(fileAddress: str = "./Data/AverageDemands.csv", roundUp: bool = True)->Tuple[List[str], Dict[str, Dict[str, int]]]:
     """Returns the list of all stores and the demands for all stores from monday to saturday"""
     
     averageDemands = pd.read_csv(fileAddress, sep=',',index_col=0)
@@ -183,10 +183,14 @@ if __name__=="__main__":
     # print(readSaturdayWithStats()[:5])
     # print(readDemandsWithStoreClosure())
     # print(readLocationGroupsWithStoreClosure())
-    dems = readDemandsWithStoreClosure()    
-    temp = readLocationGroupsWithStoreClosure()
-    allStores = []
-    for region in temp:
-        allStores.extend(temp[region])
+    # dems = readDemandsWithStoreClosure()    
+    # temp = readLocationGroupsWithStoreClosure()
+    # allStores = []
+    # for region in temp:
+    #     allStores.extend(temp[region])
 
-    print(set(allStores) ^ set(dems["Saturday"].keys()))
+    # print(set(allStores) ^ set(dems["Saturday"].keys()))
+    
+    data = readRoutes("simulationResults.json")
+    routes = data["Saturday"]["evening"]["routes"]["upper"]
+    print(routes)

@@ -322,4 +322,12 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # data = dataInput.readRoutes("simulationResults.json")
+    # routes = data["WeekdayAvg"]["morning"]["routes"]["lower"]
+    # print(routes)
+    # demands = dataInput.readAverageDemands()
+    # for route in routes:
+    #     duration = calculateDuration(route,demands["WeekdayAvg"])
+    #     tempcost = cost(duration)
+    # print(tempcost)
 
