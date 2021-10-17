@@ -39,7 +39,7 @@ def calculateDuration(route: List[str], demands: Dict[str, float], multiplier: f
         ans += travelDurations[route[i]][route[i+1]]*multiplier
         ans += 0.125*demands[route[i+1]]
 
-    return ans + travelDurations[route[-1]][depot]*multiplier
+    return round(ans + travelDurations[route[-1]][depot]*multiplier, 3)
 
 #--------------------------------------------------------------------------------------------
 #                                Initial Solution Generation
@@ -79,7 +79,7 @@ def findInitalSolution(day: str, demands: Dict[str, float], locations: Dict[str,
     solution = {}
     solutionStatus = True
 
-    for region in ["North", "West", "Central","South"]:
+    for region in ["North", "West", "NorthCentral", "SouthCentral","South"]:
         regionalDemands = {location: demands[day][location] for location in locations[region] if demands[day][location] > 0}
 
         routes = getRoutes(regionalDemands, removeOutliers=centroid_mean_ratio, maxStops=max_stores)
@@ -208,7 +208,7 @@ def initialOptimisation(days: List[str] = ["WeekdayAvg", "Saturday"]):
                                             max_stores=localSettings["max_stores"][day], 
                                             traffic_multiplier=localSettings["traffic_multiplier"], 
                                             min_route_length=localSettings["min_route_length"], 
-                                            max_duration=localSettings["max_duration"],
+                                            max_duration=localSettings["max_duration"][day],
                                             lpDisplay=localSettings["display_lp_output"])
         
         if not solStatus:
@@ -272,7 +272,7 @@ def simulateStoreClosures(days: List[str] = ["WeekdayAvg", "Saturday"]):
                                             max_stores=localSettings["max_stores"][day], 
                                             traffic_multiplier=localSettings["traffic_multiplier"], 
                                             min_route_length=localSettings["min_route_length"], 
-                                            max_duration=localSettings["max_duration"],
+                                            max_duration=localSettings["max_duration"][day],
                                             lpDisplay=localSettings["display_lp_output"])
         
         if not solStatus:
