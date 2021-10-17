@@ -29,11 +29,8 @@ Note that above installation of requirements.txt file is **not mandatory**. If y
 - ***Simulations*** - costs and 95% percentile interval of simulation results. 
 - ***routing.py*** - generate set of feasible routes that LP can run.
 - ***dataInput.py*** - reads data and outputs data in format specifically compatible to input format of our functions. 
-<<<<<<< HEAD
 - ***linearProgram.py*** - mixed-integer linear program which inputs set of feasbile routes to output lowest-cost route for a region. 
-=======
 - ***linearProgram.py*** - mixed-integer linear program which inputs set of feasbile routes to output lowest-cost route for a region.
->>>>>>> 60a2d31dd0e0d4e9efaa150a61a2cb9b77c195b7
 
 ## Results
 
