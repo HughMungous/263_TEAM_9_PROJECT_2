@@ -1,0 +1,44 @@
+# ENGSCI 263: Operations Research Project by Team 9
+**Team members: Hugh Parsons, Emily Hacket Pain, Jacky Jin, Nicholas Lee**
+
+The project objective is to find optimal routing plan to satisfy all Woolworth supermarket demands in Auckland, analyse the effect of uncertainty around the demand for pallets and traffic conditions, and finally analyse the effect of closing Woolworths supermarkets that are potentially redundant due to close proximity.
+
+<p float="left">
+  <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/Visualisation/StoreLocations.png" width = 213>
+  <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/Visualisation/CostUncertainty.png" width=270>
+  <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/Visualisation/ShopClosureJustification.png" width=200>
+</p>
+
+This repository stores all the relevant files for our project.
+
+## Installation 
+
+The [requirements.txt](https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/requirements.txt) file lists all Python libraries that our project code depend on, and they will be installed using:
+
+```bash
+pip install -r requirements.txt
+```
+
+Note that above installation of requirements.txt file is **not mandatory**. If your python packages are up-to-date, above step is unnecessary. 
+
+## Files  
+
+- ***mapping.ipynb*** - Jupyter notebook for route visualisation. 
+- ***test.py*** - Testing suite to validate the solution outputs. 
+- ***Data*** - Folder for given data in csv format. 
+- ***Simulations*** - costs and 95% percentile interval of simulation results. 
+- ***routing.py*** - generate set of feasible routes that LP can run.
+- ***dataInput.py*** - reads data and outputs data in format specifically compatible to input format of our functions. 
+<<<<<<< HEAD
+- ***linearProgram.py*** - mixed-integer linear program which inputs set of feasbile routes to output lowest-cost route for a region. 
+=======
+- ***linearProgram.py*** - mixed-integer linear program which inputs set of feasbile routes to output lowest-cost route for a region.
+>>>>>>> 60a2d31dd0e0d4e9efaa150a61a2cb9b77c195b7
+
+## Results
+
+**Optimal Routing plan (Weekday and Saturday, respectively):**
+<p float="left">
+  <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/Visualisation/WeekdayOptimalRoute.png?raw=true" width =350>
+  <img src="https://github.com/HughMungous/263_TEAM_9_PROJECT_2/blob/master/Visualisation/SaturdayOptimalRoute.png?raw=true" width=348>
+</p>
