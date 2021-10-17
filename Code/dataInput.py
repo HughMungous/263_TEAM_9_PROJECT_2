@@ -14,26 +14,49 @@ from typing import Dict, List, Tuple
 
 def readLocationGroups(fileAddress: str = "./Data/LocationGroups.csv")->Dict[str, List[str]]:
     """
-    Returns the stores in their location groups
+    Returns the stores in their region groups (North, West, Central and South)
     
+    Parameters
+    ---------
+    fileAddress: str
+                 Names of supermarkets in each region (North, West, Central and South)
     
+    Returns
+    ------
+    res: dictionary
+         Stores in their region groups
     
     """
     
-
+    # read the input which is the csv file and comma is the delimiter
     locationGroupData = pd.read_csv(fileAddress, sep=',')
     
+    # res is a dictionary
     res = {}
     for column in locationGroupData.columns:
         temp = list(locationGroupData[column][:]) + [np.NaN]
         temp = temp[:temp.index(np.NaN)]
         temp = [store.replace('_', ' ') if '_' in store else store for store in temp ]
         res[column] = temp   
-        
+    
+    # returns the dictionary res
     return res
 
 def readAverageDemands(fileAddress: str = "./Data/AverageDemands.csv", roundUp: bool = True)->Tuple[List[str], Dict[str, Dict[str, int]]]:
-    """Returns the list of all stores and the demands for all stores from monday to saturday"""
+    """
+    Returns the list of all stores and the demands for all stores from Monday to Saturday
+    
+    Parameters
+    ---------
+    fileAddress: str
+                 Average demand of pallets for each supermarket
+    
+    Returns
+    -------
+    res: dictionary
+         Stores and the demands for all store from Monday to Saturday
+    
+    """
     
     averageDemands = pd.read_csv(fileAddress, sep=',',index_col=0)
     averageDemands['WeekdayAvg'] = averageDemands[['Monday','Tuesday','Wednesday','Thursday','Friday']].mean(numeric_only=True, axis=1)
@@ -43,16 +66,41 @@ def readAverageDemands(fileAddress: str = "./Data/AverageDemands.csv", roundUp: 
         res = {day: {store: np.ceil(averageDemands[day][store]) for store in stores} for day in averageDemands.columns}
     else:
         res = {day: {store: averageDemands[day][store] for store in stores} for day in averageDemands.columns}
+    
     # return stores, res
     return res
     
 def readTravelDurations(fileAddress: str = "./Data/WoolworthsTravelDurations.csv")->pd.DataFrame:
-    """Returns the adjacency matrix for the stores with the values converted to hours"""
+    """
+    Returns the adjacency matrix for the stores with the values converted to hours
     
+    Parameters
+    ----------
+    fileAddress: str
+                 Travel durations in seconds between each pair of stores and distribution points
+    
+    Returns
+    -------
+    Adjacency matrix for the stores with the durations in hours
+    
+    """
+    
+    # Returns a transformed dataframe
     return pd.read_csv(fileAddress,sep=',',index_col=0).applymap(lambda x: x/3600)
 
 def readStoreCoordinates(fileAddress: str = "./Data/WoolworthsLocations.csv")->pd.DataFrame:
-    """Read the longitude and latitude values from the WoolworthsLocations csv"""
+    """
+    Read the longitude and latitude values from the WoolworthsLocations csv
+    
+    Parameters
+    ----------
+    fileAddress: str
+                 Latitude and longitude of Woolworths supermarkets
+                 
+    Returns
+    ------
+    
+    """
     
     return pd.read_csv(fileAddress, sep=",",usecols=['Store','Lat','Long']).set_index('Store')
     
