@@ -140,15 +140,7 @@ def readSaturdayWithStats(fileAddress: str = "Data/WoolworthsDemands.csv", round
 
 # --------------------------------------------------------------
 # NEW FUNCTION, DONT DELETE
-def readLocationGroupsWithStoreClosure()->Dict[str, List[str]]:
-    toClose = [ # store to be closed, store for demands to be transfered to
-        ("Countdown Sylvia Park", "Countdown Mt Wellington"),
-        ("Countdown Highland Park", "Countdown Aviemore Drive"),
-        ("Countdown Northwest", "Countdown Westgate"),
-        ("Countdown Papakura", "Countdown Roselands"),
-        ("Countdown Manukau", "Countdown Manukau Mall")
-        ]
-    
+def readLocationGroupsWithStoreClosure(toClose: List[List[str]])->Dict[str, List[str]]:
     stores = readLocationGroups()  
 
     for store in toClose:
@@ -159,16 +151,8 @@ def readLocationGroupsWithStoreClosure()->Dict[str, List[str]]:
     return stores
     
 
-def readDemandsWithStoreClosure(transferRatio = 0.5):
-    toClose = [ # store to be closed, store for demands to be transfered to
-        ("Countdown Sylvia Park", "Countdown Mt Wellington"),
-        ("Countdown Highland Park", "Countdown Aviemore Drive"),
-        ("Countdown Northwest", "Countdown Westgate"),
-        ("Countdown Papakura", "Countdown Roselands"),
-        ("Countdown Manukau", "Countdown Manukau Mall")
-        ]
-
-    demandDict = readAverageDemands()[1]
+def readDemandsWithStoreClosure(toClose: List[List[str]], transferRatio = 0.5, roundUp: bool = False):
+    demandDict = readAverageDemands()
 
     for day in ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]:
         del demandDict[day]
@@ -179,6 +163,11 @@ def readDemandsWithStoreClosure(transferRatio = 0.5):
         demandDict["Saturday"][storeGroups[1]] += demandDict["Saturday"][storeGroups[0]]*transferRatio
         del demandDict["WeekdayAvg"][storeGroups[0]]
         del demandDict["Saturday"][storeGroups[0]]
+
+    if roundUp:
+        for day in demandDict:
+            for store in demandDict[day]:
+                demandDict[day][store] = np.ceil(demandDict[day][store])
         
     return demandDict
 
