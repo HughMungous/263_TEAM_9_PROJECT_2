@@ -173,9 +173,9 @@ def runSimulationInstance(demands: pd.DataFrame, routes: List[List[str]], traffi
             }
 
     statistics = {
-        "lengths": routeLengths, 
-        "durations": routeDurations, 
-        "costs": routeCosts
+        "lengths": [x for _,x in sorted(zip(routeCosts,routeLengths))], 
+        "durations": [x for _,x in sorted(zip(routeCosts,routeDurations))], 
+        "costs": sorted(routeCosts)
             }
 
     return resRoutes, statistics
@@ -342,17 +342,25 @@ def main():
             for period in simulationResults[day]:
                 print(f"\n{period}:\n{'-'*(len(period)+1)}\n")
                 period_multiplier = multipliers[0] if period == "morning" else multipliers[1]
+                
+                tempData = simulationResults[day][period]["statistics"]
 
+                
+
+                keys = {# quick fix
+                    "lower":25,
+                    "median":500,
+                    "upper":975
+                }
                 for measure in simulationResults[day][period]["routes"]:
                     print(f"\n{measure}:\n")
-                    durations = [calculateDuration(route, demands[day], period_multiplier) for route in simulationResults[day][period]["routes"][measure]]
-                    costs = [cost(dur) for dur in durations]
+                    
 
-                    print(f"Total Cost:\t\t{sum(costs):.3f}")
-                    print(f"Average Duration:\t{sum(durations)/len(durations):.3f}")
-                    print(f"Number of Trucks:\t{len(durations)}\n")
+                    print(f"Total Cost:\t\t{tempData['costs'][keys[measure]]:.3f}")
+                    print(f"Average Duration:\t{tempData['durations'][keys[measure]]:.3f}")
+                    print(f"Number of Trucks:\t{tempData['lengths'][keys[measure]]}\n")
 
-                tempData = simulationResults[day][period]["statistics"]
+                
                 msg = "Statistics:"
                 print(f"{msg}")
 
