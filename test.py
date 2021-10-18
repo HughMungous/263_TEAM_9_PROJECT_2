@@ -26,43 +26,44 @@ then add the tests to the main function.
 """
 TEST_RESULT = lambda x: "\033[96mPASS\033[0m" if x else "\033[91mFAIL\033[0m"
 
-def calculateDuration(route, day):
+def calculateDuration(route, day, multiplier = 1):
     ans = 0
     for i in range(len(route)-1):
-        ans += travelDurations[route[i]][route[i+1]]
+        ans += travelDurations[route[i]][route[i+1]] * multiplier
         ans += 0.125*demands[day][route[i+1]]
-    return ans + travelDurations[route[-1]][depot]
+    return ans + travelDurations[route[-1]][depot]* multiplier
 
 def checkSolutionIsPartition(partitions, day):
     """Function to check whether solution visits everystore"""
 
     res = True
-    for region in partitions:
-        rSet = set()
-        for route in partitions[region]:
-            tempSet = set(route)
-            if (rSet & tempSet) - depotSet:
-                print("Solution visits same store twice")
-                print(f"First overlapping store/s: {(rSet & tempSet) - depotSet}")
-                res = False
-            rSet |= tempSet
-
-        if rSet != set([loc for loc in locations[region] if demands[day][loc] > 0.0]) ^ depotSet:            
-            print("Solution misses certain stores")
-            print(f"Missing stores: {set(locations[region]) ^ rSet ^ depotSet}")
+    
+    rSet = set()
+    for route in partitions:
+        tempSet = set(route)
+        if (rSet & tempSet) - depotSet:
+            print("Solution visits same store twice")
+            print(f"First overlapping store/s: {(rSet & tempSet) - depotSet}")
             res = False
+        rSet |= tempSet
+
+    storeSet = set()
+    if rSet != set([loc for region in locations for loc in locations[region] if demands[day][loc] > 0.0]) ^ depotSet:            
+        print("Solution misses certain stores")
+        print(f"Missing stores: {set([loc for region in locations for loc in locations[region]]) ^ rSet ^ depotSet}")
+        res = False
 
     return res
 
-def checkAverageDuration(partitions, day):
+def checkAverageDuration(partition, day):
     nTrucks, totDuration = 0, 0
-    for region in partitions:
-        nTrucks += len(partitions[region])
-        totDuration += sum([calculateDuration(route, day) for route in partitions[region]])
+    
+    nTrucks += len(partition)
+    totDuration += sum([calculateDuration(route, day) for route in partition])
     return totDuration / nTrucks <= 4
 
-def checkNumberOfTrucks(partitions):
-    return sum(len(partitions[region]) for region in partitions) <= 60
+def checkNumberOfTrucks(partition):
+    return len(partition) <= 60
 
 def verifySolutionValidity(partitions, day):
     print(f"\n\n\t\tTesting {day}:\n\t\t-------{'-'*len(day)}-\n")
@@ -101,22 +102,17 @@ if __name__ == "__main__":
     depotSet = set([depot])
 
     locations = dataInput.readLocationGroups()
-    stores, demands = dataInput.readAverageDemands()
+    demands = dataInput.readAverageDemands(roundUp=True)
     travelDurations = dataInput.readTravelDurations()
     coordinates = dataInput.readStoreCoordinates()
 
     routeFinder = routing.Pathfinder(travelDurations)
 
-    statement ="TESTING PARTITION METHOD:"
-    print(f"\t\t{statement}\n\t\t{'-'*len(statement)}")
-    for testDay in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']:
-        
-        testPartitions = dataInput.readRoutes(f'Solutions/{testDay}Solution.json')
-        verifySolutionValidity(testPartitions, testDay)
-        
+    
     statement ="TESTING LP METHOD:"
     print(f"\n\n\t\t{statement}\n\t\t{'-'*len(statement)}")
-    for testDay in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']:
-        testPartitions = dataInput.readRoutes(f'nonPartitionedSolutions/{testDay}.json')
-        verifySolutionValidity(testPartitions, testDay)
+    testPartitions = dataInput.readRoutes(f'Solutions/initialRoutes.json')
+    
+    for testDay in ['WeekdayAvg', 'Saturday']:
+        verifySolutionValidity(testPartitions[testDay], testDay)
     
