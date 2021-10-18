@@ -79,7 +79,7 @@ def findInitalSolution(day: str, demands: Dict[str, float], locations: Dict[str,
     solution = {}
     solutionStatus = True
 
-    for region in ["North", "West", "NorthCentral", "SouthCentral","South"]:
+    for region in locations.keys():
         regionalDemands = {location: demands[day][location] for location in locations[region] if demands[day][location] > 0}
 
         routes = getRoutes(regionalDemands, removeOutliers=centroid_mean_ratio, maxStops=max_stores)
@@ -167,9 +167,9 @@ def runSimulationInstance(demands: pd.DataFrame, routes: List[List[str]], traffi
     tempRoutes = [x for _, x in sorted(zip(routeDurations, newRoutes))]
     
     resRoutes = {
-        "lower": tempRoutes[25],
+        "upper": tempRoutes[25],
         "median": tempRoutes[500],
-        "upper": tempRoutes[975]
+        "lower": tempRoutes[975]
             }
 
     statistics = {
