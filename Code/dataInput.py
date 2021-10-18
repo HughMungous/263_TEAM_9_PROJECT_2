@@ -8,6 +8,7 @@ import datetime
 import numpy as np
 import pandas as pd
 import json
+import os
 
 from typing import Dict, List, Tuple
 
@@ -27,7 +28,7 @@ def readLocationGroups(fileAddress: str = "./Data/LocationGroups.csv")->Dict[str
          Stores in their region groups
     
     """
-    
+    fileAddress = fileAddress.replace('/', os.sep)
     # read the input which is the csv file and comma is the delimiter
     locationGroupData = pd.read_csv(fileAddress, sep=',')
     
@@ -57,7 +58,7 @@ def readAverageDemands(fileAddress: str = "./Data/AverageDemands.csv", roundUp: 
          Stores and the demands for all store from Monday to Saturday
     
     """
-    
+    fileAddress = fileAddress.replace('/', os.sep)
     averageDemands = pd.read_csv(fileAddress, sep=',',index_col=0)
     averageDemands['WeekdayAvg'] = averageDemands[['Monday','Tuesday','Wednesday','Thursday','Friday']].mean(numeric_only=True, axis=1)
 
@@ -84,7 +85,7 @@ def readTravelDurations(fileAddress: str = "./Data/WoolworthsTravelDurations.csv
     Dataframe: Adjacency matrix for the stores with the durations in hours
     
     """
-    
+    fileAddress = fileAddress.replace('/', os.sep)
     # Returns a transformed dataframe
     return pd.read_csv(fileAddress,sep=',',index_col=0).applymap(lambda x: x/3600)
 
@@ -101,7 +102,7 @@ def readStoreCoordinates(fileAddress: str = "./Data/WoolworthsLocations.csv")->p
     ------
     Dataframe: Latitude and longtitude of each Woolworth supermarket
     """
-    
+    fileAddress = fileAddress.replace('/', os.sep)
     return pd.read_csv(fileAddress, sep=",",usecols=['Store','Lat','Long']).set_index('Store')
     
 def storeRoutes(partitions, fileAddress='Data/newRoutes.json'):
@@ -116,6 +117,7 @@ def storeRoutes(partitions, fileAddress='Data/newRoutes.json'):
      fileAddress: str
                   name of the file to store the data in, should be a json
     """
+    fileAddress = fileAddress.replace('/', os.sep)
     fp = open(fileAddress, mode='w')
 
     json.dump(partitions,fp)
@@ -136,6 +138,7 @@ def readRoutes(fileAddress='Data/newRoutes.json'):
           Contains routes
     
     """
+    fileAddress = fileAddress.replace('/', os.sep)
     fp = open(fileAddress, mode='r')
 
     temp = json.load(fp)
@@ -155,7 +158,8 @@ def readDataWithStats(fileAddress: str = 'Data/WoolworthsDemands.csv', roundUp: 
     newDf: DataFrame
     
     '''
-    
+    fileAddress = fileAddress.replace('/', os.sep)
+
     df = pd.read_csv(fileAddress).set_index('Store')
     df.columns = pd.to_datetime(df.columns)
     
@@ -198,7 +202,8 @@ def readSaturdayWithStats(fileAddress: str = "Data/WoolworthsDemands.csv", round
     newDf: DataFrame
     
     '''
-    
+    fileAddress = fileAddress.replace('/', os.sep)
+
     df = pd.read_csv(fileAddress).set_index('Store')
     df.columns = pd.to_datetime(df.columns)
     
@@ -228,6 +233,7 @@ def readSaturdayWithStats(fileAddress: str = "Data/WoolworthsDemands.csv", round
 # --------------------------------------------------------------
 # NEW FUNCTION, DONT DELETE
 def readLocationGroupsWithStoreClosure(toClose: List[List[str]])->Dict[str, List[str]]:
+    
     stores = readLocationGroups()  
 
     for store in toClose:
