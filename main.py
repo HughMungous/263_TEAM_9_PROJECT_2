@@ -164,12 +164,12 @@ def runSimulationInstance(demands: pd.DataFrame, routes: List[List[str]], traffi
         routeCosts.append(curCost)
         routeDurations.append(curDur/routeLengths[-1])
 
-    tempRoutes = [x for _, x in sorted(zip(routeDurations, newRoutes))]
+    tempRoutes = [x for _, x in sorted(zip(routeCosts, newRoutes))]
     
     resRoutes = {
-        "upper": tempRoutes[25],
+        "lower": tempRoutes[25],
         "median": tempRoutes[500],
-        "lower": tempRoutes[975]
+        "upper": tempRoutes[975]
             }
 
     statistics = {
